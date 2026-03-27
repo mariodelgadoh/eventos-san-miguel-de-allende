@@ -26,12 +26,15 @@ exports.getEvents = async (req, res) => {
     const { search, category, startDate, endDate, featured, type } = req.query;
     const filter = {};
     
-    // Filtrar por tipo de evento (actuales o pasados)
     const now = new Date();
+    
+    // Filtrar por tipo de evento
     if (type === 'upcoming') {
+      // Eventos futuros (fecha >= ahora)
       filter.date = { $gte: now };
       filter.isActive = true;
     } else if (type === 'past') {
+      // Eventos pasados (fecha < ahora)
       filter.date = { $lt: now };
     } else {
       // Si no se especifica tipo, mostrar todos activos
@@ -145,7 +148,7 @@ exports.toggleFeatured = async (req, res) => {
   }
 };
 
-// Nueva función para archivar eventos pasados automáticamente
+// Función para archivar eventos pasados (opcional)
 exports.archivePastEvents = async () => {
   try {
     const now = new Date();
