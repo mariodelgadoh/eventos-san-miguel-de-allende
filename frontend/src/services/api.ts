@@ -1,7 +1,19 @@
 import axios from 'axios';
 import { Event, Comment, User, AuthResponse, Favorite } from '../types';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Forzar la URL del backend en producción
+const getApiUrl = () => {
+  // En producción (Netlify), usar la URL de Render
+  if (window.location.hostname !== 'localhost') {
+    return 'https://eventos-san-miguel-de-allende.onrender.com/api';
+  }
+  // En desarrollo local
+  return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+};
+
+const API_URL = getApiUrl();
+
+console.log('API_URL:', API_URL); // Para verificar en consola
 
 const api = axios.create({
   baseURL: API_URL,
