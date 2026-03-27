@@ -1,8 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import EventCard from '../components/EventCard';
+import ImageCarousel from '../components/ImageCarousel';
 import { eventService } from '../services/api';
 import { Event } from '../types';
+
+// ============================================
+// 📸 AQUÍ PONES TUS IMÁGENES
+// ============================================
+// Coloca tus imágenes en: frontend/public/images/hero/
+// Luego lista los nombres de tus imágenes aquí:
+const heroImages = [
+  '/images/hero/imagen1.jpg',
+  '/images/hero/imagen2.jpg',
+  '/images/hero/imagen3.jpg',
+  '/images/hero/imagen4.jpg',
+  '/images/hero/imagen5.jpg',
+];
+// ============================================
 
 const Home: React.FC = () => {
   const [featuredEvents, setFeaturedEvents] = useState<Event[]>([]);
@@ -23,7 +38,6 @@ const Home: React.FC = () => {
           eventService.getEvents({ type: 'past' }).catch(() => [])
         ]);
         
-        // Asegurar que siempre sean arrays
         setFeaturedEvents(Array.isArray(featured) ? featured.slice(0, 3) : []);
         setUpcomingEvents(Array.isArray(upcoming) ? upcoming.slice(0, 6) : []);
         setPastEvents(Array.isArray(past) ? past.slice(0, 3) : []);
@@ -66,24 +80,28 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12 sm:py-16 md:py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 animate-fade-in">
-            🎉 Descubre los mejores eventos
-          </h1>
-          <p className="text-lg sm:text-xl md:text-2xl mb-2 sm:mb-4">
-            en San Miguel de Allende
-          </p>
-          <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
-            Cultura, música, gastronomía, arte y deporte en la ciudad más hermosa de México
-          </p>
-          <Link
-            to="/events"
-            className="inline-block bg-white text-blue-600 px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold hover:bg-gray-100 transition transform hover:scale-105 shadow-lg text-sm sm:text-base"
-          >
-            Explorar eventos →
-          </Link>
+      {/* Hero Section con Carrusel de Imágenes */}
+      <div className="relative h-[500px] sm:h-[600px] md:h-[700px] lg:h-[800px] overflow-hidden">
+        <ImageCarousel images={heroImages} interval={5000} />
+        
+        <div className="relative z-10 flex items-center justify-center h-full text-white">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 animate-fade-in">
+              🎉 Descubre los mejores eventos
+            </h1>
+            <p className="text-lg sm:text-xl md:text-2xl mb-2 sm:mb-4">
+              en San Miguel de Allende
+            </p>
+            <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
+              Cultura, música, gastronomía, arte y deporte en la ciudad más hermosa de México
+            </p>
+            <Link
+              to="/events"
+              className="inline-block bg-white text-blue-600 px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold hover:bg-gray-100 transition transform hover:scale-105 shadow-lg text-sm sm:text-base"
+            >
+              Explorar eventos →
+            </Link>
+          </div>
         </div>
       </div>
 
