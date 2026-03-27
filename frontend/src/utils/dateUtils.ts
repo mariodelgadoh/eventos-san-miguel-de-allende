@@ -1,4 +1,5 @@
-import { format, parseISO, utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
+import { format, parseISO } from 'date-fns';
+import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 
 // Zona horaria de San Miguel de Allende (México)
