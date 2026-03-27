@@ -37,6 +37,18 @@ const EventCard: React.FC<EventCardProps> = ({
     Deporte: '⚽',
   };
 
+  // Función segura para formatear fecha
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'Fecha no disponible';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Fecha inválida';
+      return format(date, "d 'de' MMMM 'de' yyyy", { locale: es });
+    } catch (error) {
+      return 'Fecha inválida';
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
       <div className="relative">
@@ -66,17 +78,17 @@ const EventCard: React.FC<EventCardProps> = ({
       <div className="p-3 sm:p-4 md:p-5">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 line-clamp-1 flex-1">
-            {event.name}
+            {event.name || 'Sin nombre'}
           </h3>
         </div>
         
         <p className="text-gray-600 mb-2 line-clamp-2 text-xs sm:text-sm">
-          {event.description}
+          {event.description || 'Sin descripción'}
         </p>
         
         <div className="flex flex-wrap gap-1 sm:gap-2 mb-2">
-          <span className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-semibold ${categoryColors[event.category]}`}>
-            {categoryIcons[event.category]} {event.category}
+          <span className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-semibold ${categoryColors[event.category] || 'bg-gray-100 text-gray-800'}`}>
+            {categoryIcons[event.category] || '📌'} {event.category || 'General'}
           </span>
           {event.isFeatured && (
             <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
@@ -89,12 +101,12 @@ const EventCard: React.FC<EventCardProps> = ({
           <div className="flex items-center gap-1 sm:gap-2">
             <span>📅</span>
             <span className="text-xs sm:text-sm">
-              {format(new Date(event.date), "d MMM yyyy", { locale: es })}
+              {formatDate(event.date)}
             </span>
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
             <span>📍</span>
-            <span className="truncate text-xs sm:text-sm">{event.address}</span>
+            <span className="truncate text-xs sm:text-sm">{event.address || 'Sin dirección'}</span>
           </div>
         </div>
         
