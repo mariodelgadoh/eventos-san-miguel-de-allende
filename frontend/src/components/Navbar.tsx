@@ -38,7 +38,7 @@ const Navbar: React.FC = () => {
             className="text-xl md:text-2xl font-bold hover:text-blue-200 transition flex items-center gap-2"
             onClick={closeMenu}
           >
-            <span className="text-2xl md:text-3xl">🎉</span>
+            <span className="text-2xl md:text-3xl"></span>
             <span className="hidden xs:inline">Eventos SMA</span>
             <span className="xs:hidden">SMA</span>
           </Link>
