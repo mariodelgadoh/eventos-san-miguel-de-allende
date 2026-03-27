@@ -9,20 +9,27 @@ const Home: React.FC = () => {
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [pastEvents, setPastEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        setLoading(true);
+        setError(null);
+        
         const [featured, upcoming, past] = await Promise.all([
-          eventService.getEvents({ featured: true }),
-          eventService.getEvents({ type: 'upcoming' }),
-          eventService.getEvents({ type: 'past' })
+          eventService.getEvents({ featured: true }).catch(() => []),
+          eventService.getEvents({ type: 'upcoming' }).catch(() => []),
+          eventService.getEvents({ type: 'past' }).catch(() => [])
         ]);
-        setFeaturedEvents(featured.slice(0, 3));
-        setUpcomingEvents(upcoming.slice(0, 6));
-        setPastEvents(past.slice(0, 3));
+        
+        // Asegurar que siempre sean arrays
+        setFeaturedEvents(Array.isArray(featured) ? featured.slice(0, 3) : []);
+        setUpcomingEvents(Array.isArray(upcoming) ? upcoming.slice(0, 6) : []);
+        setPastEvents(Array.isArray(past) ? past.slice(0, 3) : []);
       } catch (error) {
         console.error('Error fetching events:', error);
+        setError('Error al cargar eventos');
       } finally {
         setLoading(false);
       }
@@ -39,9 +46,27 @@ const Home: React.FC = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="bg-red-50 rounded-xl p-8 max-w-md mx-auto">
+          <div className="text-4xl mb-4">⚠️</div>
+          <h2 className="text-xl font-semibold text-red-700 mb-2">Error</h2>
+          <p className="text-red-600">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section - Responsive */}
+      {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12 sm:py-16 md:py-20">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 animate-fade-in">
@@ -124,7 +149,7 @@ const Home: React.FC = () => {
         </div>
       )}
 
-      {/* Categories Section - Responsive */}
+      {/* Categories Section */}
       <div className="bg-white py-8 sm:py-12 md:py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 md:mb-12">
