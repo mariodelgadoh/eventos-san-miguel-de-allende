@@ -56,8 +56,10 @@ const eventSchema = new mongoose.Schema({
   }
 });
 
+// Índices para búsqueda
 eventSchema.index({ name: 'text', description: 'text' });
 
+// Validación de ubicación dentro de San Miguel de Allende
 eventSchema.pre('save', function(next) {
   const { lat, lng } = this.coordinates;
   const isValidLat = lat >= 20.85 && lat <= 21.05;
