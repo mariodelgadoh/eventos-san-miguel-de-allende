@@ -4,6 +4,7 @@ import { eventService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import ImageUpload from '../components/ImageUpload';
 import { Event, Category } from '../types';
+import { localToUTC, formatDateForInput } from '../utils/dateUtils';
 
 const compressImage = (file: File, maxSizeMB: number = 0.5): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -95,7 +96,7 @@ const EditEvent: React.FC = () => {
         address: data.address,
         lat: data.coordinates.lat.toString(),
         lng: data.coordinates.lng.toString(),
-        date: data.date.slice(0, 16),
+        date: formatDateForInput(data.date),
         category: data.category,
       });
     } catch (error) {
@@ -123,11 +124,6 @@ const EditEvent: React.FC = () => {
 
   const handleRemoveImage = (index: number) => {
     const removedImage = images[index];
-    
-    if (removedImage && !removedImage.startsWith('blob:')) {
-      // Imagen existente que se elimina
-    }
-    
     setImages(images.filter((_, i) => i !== index));
     
     if (removedImage && removedImage.startsWith('blob:')) {
@@ -146,6 +142,10 @@ const EditEvent: React.FC = () => {
     setSaving(true);
 
     try {
+      // Convertir la fecha local a UTC para guardar
+      const localDate = new Date(formData.date);
+      const utcDate = localToUTC(localDate);
+      
       const compressedNewImages = await Promise.all(
         newImageFiles.map(file => compressImage(file, 0.5))
       );
@@ -162,7 +162,7 @@ const EditEvent: React.FC = () => {
           lng: parseFloat(formData.lng),
         },
         images: allImages,
-        date: formData.date,
+        date: utcDate.toISOString(),
         category: formData.category,
       };
 
@@ -313,6 +313,7 @@ const EditEvent: React.FC = () => {
                 required
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition"
               />
+              <p className="text-xs text-gray-500 mt-1">Hora de San Miguel de Allende (México)</p>
             </div>
 
             <div>

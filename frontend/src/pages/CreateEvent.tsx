@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { eventService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import ImageUpload from '../components/ImageUpload';
+import { localToUTC, formatDateForInput } from '../utils/dateUtils';
 
 const compressImage = (file: File, maxSizeMB: number = 0.5): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -62,7 +63,7 @@ const CreateEvent: React.FC = () => {
     address: '',
     lat: '',
     lng: '',
-    date: '',
+    date: formatDateForInput(new Date().toISOString()),
     category: 'Cultura',
   });
 
@@ -97,6 +98,10 @@ const CreateEvent: React.FC = () => {
     setLoading(true);
 
     try {
+      // Convertir la fecha local a UTC para guardar
+      const localDate = new Date(formData.date);
+      const utcDate = localToUTC(localDate);
+      
       const compressedImages = await Promise.all(
         imageFiles.map(file => compressImage(file, 0.5))
       );
@@ -107,6 +112,7 @@ const CreateEvent: React.FC = () => {
           lat: parseFloat(formData.lat),
           lng: parseFloat(formData.lng),
         },
+        date: utcDate.toISOString(),
         images: compressedImages,
       };
 
@@ -231,6 +237,7 @@ const CreateEvent: React.FC = () => {
                 required
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
               />
+              <p className="text-xs text-gray-500 mt-1">Hora de San Miguel de Allende (México)</p>
             </div>
 
             <div>

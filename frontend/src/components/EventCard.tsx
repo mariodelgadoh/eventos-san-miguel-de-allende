@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Event } from '../types';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatEventDateOnly } from '../utils/dateUtils';
 
 interface EventCardProps {
   event: Event;
@@ -35,18 +34,6 @@ const EventCard: React.FC<EventCardProps> = ({
     Gastronomía: '🍽️',
     Arte: '🎨',
     Deporte: '⚽',
-  };
-
-  // Función segura para formatear fecha
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'Fecha no disponible';
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Fecha inválida';
-      return format(date, "d 'de' MMMM 'de' yyyy", { locale: es });
-    } catch (error) {
-      return 'Fecha inválida';
-    }
   };
 
   return (
@@ -101,7 +88,7 @@ const EventCard: React.FC<EventCardProps> = ({
           <div className="flex items-center gap-1 sm:gap-2">
             <span>📅</span>
             <span className="text-xs sm:text-sm">
-              {formatDate(event.date)}
+              {formatEventDateOnly(event.date)}
             </span>
           </div>
           <div className="flex items-center gap-1 sm:gap-2">

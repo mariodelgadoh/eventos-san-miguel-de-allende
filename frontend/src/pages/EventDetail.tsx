@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale';
 import { eventService, commentService, favoriteService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Event, Comment } from '../types';
+import { formatEventDate } from '../utils/dateUtils';
 
 const EventDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -260,10 +261,7 @@ const EventDetail: React.FC = () => {
                 <div>
                   <p className="text-sm text-gray-500">Fecha y hora</p>
                   <p className="font-semibold text-gray-800">
-                    {format(new Date(event.date), "EEEE d 'de' MMMM 'de' yyyy", { locale: es })}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {format(new Date(event.date), "h:mm a", { locale: es })}
+                    {formatEventDate(event.date)}
                   </p>
                 </div>
               </div>
