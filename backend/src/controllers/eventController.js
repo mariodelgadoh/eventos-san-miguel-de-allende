@@ -31,14 +31,11 @@ exports.getEvents = async (req, res) => {
     
     // Filtrar por tipo de evento basado en endDate
     if (type === 'upcoming') {
-      // Eventos futuros (endDate >= ahora)
       filter.endDate = { $gte: now };
       filter.isActive = true;
     } else if (type === 'past') {
-      // Eventos pasados (endDate < ahora)
       filter.endDate = { $lt: now };
     } else {
-      // Si no se especifica tipo, mostrar todos activos
       filter.isActive = true;
     }
 
@@ -89,8 +86,15 @@ exports.updateEvent = async (req, res) => {
       return res.status(403).json({ message: 'No autorizado' });
     }
 
-    if (req.body.coordinates) {
-      const { lat, lng } = req.body.coordinates;
+    const updateData = { ...req.body };
+    
+    // Si el frontend envió 'date' (estructura vieja), lo ignoramos
+    if (updateData.date) {
+      delete updateData.date;
+    }
+    
+    if (updateData.coordinates) {
+      const { lat, lng } = updateData.coordinates;
       const isValidLat = lat >= 20.85 && lat <= 21.05;
       const isValidLng = lng >= -100.85 && lng <= -100.60;
       
@@ -101,9 +105,8 @@ exports.updateEvent = async (req, res) => {
       }
     }
 
-    // Validar fechas
-    if (req.body.endDate && req.body.startDate) {
-      if (new Date(req.body.endDate) <= new Date(req.body.startDate)) {
+    if (updateData.startDate && updateData.endDate) {
+      if (new Date(updateData.endDate) <= new Date(updateData.startDate)) {
         return res.status(400).json({ 
           message: 'La fecha de fin debe ser posterior a la fecha de inicio' 
         });
@@ -112,12 +115,13 @@ exports.updateEvent = async (req, res) => {
 
     const updatedEvent = await Event.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true, runValidators: true }
+      updateData,
+      { new: true, runValidators: false }
     ).populate('organizer', 'name email');
 
     res.json(updatedEvent);
   } catch (error) {
+    console.error('Error updateEvent:', error);
     res.status(500).json({ message: 'Error al actualizar evento', error: error.message });
   }
 };
@@ -158,7 +162,6 @@ exports.toggleFeatured = async (req, res) => {
   }
 };
 
-// Función para actualizar eventos pasados automáticamente
 exports.archivePastEvents = async () => {
   try {
     const now = new Date();
