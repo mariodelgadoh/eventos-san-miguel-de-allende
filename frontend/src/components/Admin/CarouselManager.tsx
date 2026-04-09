@@ -32,6 +32,17 @@ const CarouselManager: React.FC = () => {
     }
   };
 
+  const reorderImages = async () => {
+    try {
+      await carouselService.reorderCarouselImages();
+      await fetchImages();
+      showToast('Imágenes reordenadas correctamente', 'success');
+    } catch (error) {
+      console.error('Error reordering images:', error);
+      showToast('Error al reordenar imágenes', 'error');
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -81,7 +92,7 @@ const CarouselManager: React.FC = () => {
       setSelectedFile(null);
       setPreviewUrl('');
       setFormData({ imageUrl: '', title: '', order: images.length });
-      fetchImages();
+      await fetchImages();
     } catch (error) {
       console.error('Error saving image:', error);
       showToast('Error al guardar la imagen', 'error');
@@ -93,7 +104,7 @@ const CarouselManager: React.FC = () => {
       try {
         await carouselService.deleteCarouselImage(id);
         showToast('Imagen eliminada exitosamente', 'success');
-        fetchImages();
+        await fetchImages();
       } catch (error) {
         console.error('Error deleting image:', error);
         showToast('Error al eliminar la imagen', 'error');
@@ -117,9 +128,12 @@ const CarouselManager: React.FC = () => {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('isActive', (!image.isActive).toString());
+      formDataToSend.append('order', image.order.toString());
+      
       await carouselService.updateCarouselImage(image._id, formDataToSend);
+      await fetchImages();
+      
       showToast(`Imagen ${image.isActive ? 'desactivada' : 'activada'} exitosamente`, 'success');
-      fetchImages();
     } catch (error) {
       console.error('Error toggling image:', error);
       showToast('Error al cambiar estado de la imagen', 'error');
@@ -131,7 +145,7 @@ const CarouselManager: React.FC = () => {
       try {
         await carouselService.initializeDefaultImages();
         showToast('Imágenes por defecto restauradas', 'success');
-        fetchImages();
+        await fetchImages();
       } catch (error) {
         console.error('Error resetting images:', error);
         showToast('Error al restaurar imágenes', 'error');
@@ -152,6 +166,12 @@ const CarouselManager: React.FC = () => {
       <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
         <h2 className="text-lg font-medium text-gray-800">Imágenes del Carrusel</h2>
         <div className="flex gap-3">
+          <button
+            onClick={reorderImages}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+          >
+            Reordenar imágenes
+          </button>
           <button
             onClick={handleResetDefaults}
             className="px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm font-medium hover:bg-yellow-700 transition"
@@ -176,6 +196,7 @@ const CarouselManager: React.FC = () => {
       <div className="mb-4 p-3 bg-blue-50 rounded-lg">
         <p className="text-sm text-blue-800">
           Puedes subir imágenes desde tu computadora (JPG, PNG, GIF, WEBP) hasta 5MB, o usar URLs externas.
+          Usa el botón "Reordenar imágenes" para corregir el orden si es necesario.
         </p>
       </div>
 
@@ -188,7 +209,7 @@ const CarouselManager: React.FC = () => {
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500">Orden</th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500">Estado</th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500">Acciones</th>
-            </tr>
+             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {images.map((image, idx) => (
@@ -202,11 +223,11 @@ const CarouselManager: React.FC = () => {
                       (e.target as HTMLImageElement).src = 'https://placehold.co/80x60?text=Imagen';
                     }}
                   />
-                </td>
+                 </td>
                 <td className="px-4 py-3 text-gray-600">
                   <div className="font-medium text-gray-800">{image.title || `Imagen ${idx + 1}`}</div>
                   <div className="text-xs text-gray-400 truncate max-w-[200px]">{image.filename ? 'Archivo local' : image.imageUrl?.substring(0, 50)}</div>
-                </td>
+                 </td>
                 <td className="px-4 py-3 text-center text-gray-600">{image.order}</td>
                 <td className="px-4 py-3 text-center">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -214,7 +235,7 @@ const CarouselManager: React.FC = () => {
                   }`}>
                     {image.isActive ? 'Activo' : 'Inactivo'}
                   </span>
-                </td>
+                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2 justify-center">
                     <button
@@ -245,11 +266,11 @@ const CarouselManager: React.FC = () => {
                       </svg>
                     </button>
                   </div>
-                </td>
-              </tr>
+                 </td>
+               </tr>
             ))}
           </tbody>
-        </table>
+         </table>
       </div>
 
       {/* Modal para agregar/editar */}

@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// Forzar la URL del backend en producción
 const getApiUrl = () => {
   if (window.location.hostname !== 'localhost') {
     return 'https://eventos-san-miguel-de-allende.onrender.com/api';
@@ -78,6 +77,11 @@ export const carouselService = {
   
   deleteCarouselImage: async (id: string): Promise<void> => {
     await api.delete(`/carousel/${id}`);
+  },
+  
+  reorderCarouselImages: async (): Promise<CarouselImage[]> => {
+    const response = await api.post('/carousel/reorder', {});
+    return response.data;
   },
   
   initializeDefaultImages: async (): Promise<void> => {

@@ -344,7 +344,7 @@ const AdminPanel: React.FC = () => {
                         }`}>
                           {user.role === 'admin' ? 'Admin' : 'Organizador'}
                         </span>
-                       </td>
+                      </td>
                       <td className="px-4 py-3 text-center text-gray-600">{user.eventsCount || 0}</td>
                       <td className="px-4 py-3">
                         {user.isBlocked ? (
@@ -352,10 +352,10 @@ const AdminPanel: React.FC = () => {
                         ) : (
                           <span className="text-xs text-green-600">Activo</span>
                         )}
-                       </td>
+                      </td>
                       <td className="px-4 py-3 text-gray-400 text-xs">
                         {format(new Date(user.createdAt), "dd/MM/yyyy", { locale: es })}
-                       </td>
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1 justify-center">
                           {!user.isBlocked ? (
@@ -407,8 +407,8 @@ const AdminPanel: React.FC = () => {
                             </svg>
                           </button>
                         </div>
-                       </td>
-                     </tr>
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
