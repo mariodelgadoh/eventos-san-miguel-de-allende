@@ -73,12 +73,12 @@ const EditEvent: React.FC = () => {
   });
 
   const categories = [
-    { name: 'Cultura' as Category, icon: '🎭', color: 'purple' },
-    { name: 'Música' as Category, icon: '🎵', color: 'green' },
-    { name: 'Gastronomía' as Category, icon: '🍽️', color: 'red' },
-    { name: 'Arte' as Category, icon: '🎨', color: 'yellow' },
-    { name: 'Deporte' as Category, icon: '⚽', color: 'blue' },
-    { name: 'Religioso' as Category, icon: '⛪', color: 'indigo' },
+    { name: 'Cultura' as Category, icon: '🎭' },
+    { name: 'Música' as Category, icon: '🎵' },
+    { name: 'Gastronomía' as Category, icon: '🍽️' },
+    { name: 'Arte' as Category, icon: '🎨' },
+    { name: 'Deporte' as Category, icon: '⚽' },
+    { name: 'Religioso' as Category, icon: '⛪' },
   ];
 
   useEffect(() => {
@@ -93,7 +93,6 @@ const EditEvent: React.FC = () => {
       setEvent(data);
       setImages(data.images || []);
       
-      // Migración automática: si el evento tiene 'date' pero no 'startDate'
       const startDateValue = data.startDate || (data as any).date;
       const endDateValue = data.endDate || (data as any).date;
       
@@ -154,7 +153,7 @@ const EditEvent: React.FC = () => {
       const localEndDate = new Date(formData.endDate);
       
       if (localEndDate <= localStartDate) {
-        alert('❌ La fecha de fin debe ser posterior a la fecha de inicio');
+        alert('La fecha de fin debe ser posterior a la fecha de inicio');
         setSaving(false);
         return;
       }
@@ -184,12 +183,12 @@ const EditEvent: React.FC = () => {
       };
 
       await eventService.updateEvent(id!, eventData);
-      alert('✅ Evento actualizado exitosamente');
+      alert('Evento actualizado exitosamente');
       navigate(`/events/${id}`);
     } catch (error: any) {
       console.error('Error updating event:', error);
       if (error.response?.status === 413) {
-        alert('Las imágenes son demasiado grandes. Por favor usa imágenes más pequeñas (menos de 500KB cada una)');
+        alert('Las imágenes son demasiado grandes. Por favor usa imágenes más pequeñas');
       } else {
         alert(error.response?.data?.message || 'Error al actualizar el evento');
       }
@@ -200,22 +199,23 @@ const EditEvent: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+        <div className="w-8 h-8 border-2 border-gray-200 rounded-full animate-spin border-t-gray-600"></div>
+        <p className="mt-4 text-gray-400 text-sm">Cargando evento...</p>
       </div>
     );
   }
 
   if (!isAdmin && event?.organizer._id !== user?._id) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="bg-white rounded-2xl shadow-xl p-12 max-w-md mx-auto">
-          <div className="text-6xl mb-4">⛔</div>
-          <h1 className="text-2xl font-bold text-gray-800">Acceso Denegado</h1>
-          <p className="text-gray-600 mt-2">No tienes permiso para editar este evento</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
+          <div className="text-5xl mb-4">⛔</div>
+          <h1 className="text-xl font-medium text-gray-800 mb-2">Acceso Denegado</h1>
+          <p className="text-gray-500 text-sm mb-6">No tienes permiso para editar este evento</p>
           <button
             onClick={() => navigate('/events')}
-            className="mt-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition"
+            className="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition"
           >
             Volver a eventos
           </button>
@@ -225,186 +225,194 @@ const EditEvent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8">
-      <div className="container mx-auto px-4 max-w-3xl">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-8">
-            <h1 className="text-3xl font-bold text-white text-center">
-              ✏️ Editar Evento
-            </h1>
-            <p className="text-yellow-100 text-center mt-2">
-              Modifica la información de tu evento
-            </p>
-          </div>
-          
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                📝 Nombre del evento *
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition"
-                placeholder="Ej: Festival de Jazz 2024"
-              />
-            </div>
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="container mx-auto px-4 max-w-4xl">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-light text-gray-800">Editar Evento</h1>
+          <p className="text-gray-400 text-sm mt-2">Modifica la información de tu evento</p>
+          <div className="w-12 h-0.5 bg-gray-200 mx-auto mt-4"></div>
+        </div>
 
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                📖 Descripción *
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                required
-                rows={5}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition"
-                placeholder="Describe tu evento en detalle..."
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                📍 Dirección *
-              </label>
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition"
-                placeholder="Calle Principal #123, Zona Centro"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+        {/* Formulario */}
+        <form onSubmit={handleSubmit}>
+          <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+            <div className="p-6 space-y-6">
+              {/* Nombre */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  🗺️ Latitud *
+                <label className="block text-gray-600 text-sm mb-2">
+                  Nombre del evento <span className="text-red-400">*</span>
                 </label>
                 <input
-                  type="number"
-                  step="any"
-                  name="lat"
-                  value={formData.lat}
+                  type="text"
+                  name="name"
+                  value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition"
-                  placeholder="Ej: 20.9141"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition bg-gray-50"
+                  placeholder="Ej: Festival de Jazz 2024"
                 />
-                <p className="text-xs text-gray-500 mt-1">Rango: 20.85 - 21.05</p>
               </div>
+
+              {/* Descripción */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  🗺️ Longitud *
+                <label className="block text-gray-600 text-sm mb-2">
+                  Descripción <span className="text-red-400">*</span>
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                  rows={4}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition bg-gray-50 resize-none"
+                  placeholder="Describe tu evento en detalle..."
+                />
+              </div>
+
+              {/* Dirección */}
+              <div>
+                <label className="block text-gray-600 text-sm mb-2">
+                  Dirección <span className="text-red-400">*</span>
                 </label>
                 <input
-                  type="number"
-                  step="any"
-                  name="lng"
-                  value={formData.lng}
+                  type="text"
+                  name="address"
+                  value={formData.address}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition"
-                  placeholder="Ej: -100.748"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition bg-gray-50"
+                  placeholder="Calle Principal #123, Zona Centro"
                 />
-                <p className="text-xs text-gray-500 mt-1">Rango: -100.85 - -100.60</p>
               </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
+              {/* Coordenadas */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-600 text-sm mb-2">Latitud *</label>
+                  <input
+                    type="number"
+                    step="any"
+                    name="lat"
+                    value={formData.lat}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition bg-gray-50"
+                    placeholder="Ej: 20.9141"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Rango: 20.85 - 21.05</p>
+                </div>
+                <div>
+                  <label className="block text-gray-600 text-sm mb-2">Longitud *</label>
+                  <input
+                    type="number"
+                    step="any"
+                    name="lng"
+                    value={formData.lng}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition bg-gray-50"
+                    placeholder="Ej: -100.748"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Rango: -100.85 - -100.60</p>
+                </div>
+              </div>
+
+              {/* Fechas */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-600 text-sm mb-2">Fecha y hora de inicio *</label>
+                  <input
+                    type="datetime-local"
+                    name="startDate"
+                    value={formData.startDate}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-600 text-sm mb-2">Fecha y hora de fin *</label>
+                  <input
+                    type="datetime-local"
+                    name="endDate"
+                    value={formData.endDate}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition bg-gray-50"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 -mt-2">Hora de San Miguel de Allende (México)</p>
+
+              {/* Categorías */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  🗓️ Fecha y hora de inicio *
-                </label>
-                <input
-                  type="datetime-local"
-                  name="startDate"
-                  value={formData.startDate}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition"
-                />
+                <label className="block text-gray-600 text-sm mb-2">Categoría *</label>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map(cat => (
+                    <button
+                      key={cat.name}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, category: cat.name })}
+                      className={`px-4 py-2 rounded-full text-sm transition-colors ${
+                        formData.category === cat.name
+                          ? 'bg-gray-900 text-white'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      <span className="mr-1">{cat.icon}</span>
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
               </div>
+
+              {/* Imágenes */}
               <div>
-                <label className="block text-gray-700 font-semibold mb-2">
-                  🗓️ Fecha y hora de fin *
-                </label>
-                <input
-                  type="datetime-local"
-                  name="endDate"
-                  value={formData.endDate}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition"
+                <label className="block text-gray-600 text-sm mb-2">Imágenes del evento</label>
+                <ImageUpload
+                  onImagesSelected={handleImagesSelected}
+                  images={images}
+                  onRemoveImage={handleRemoveImage}
                 />
+                <p className="text-xs text-gray-400 mt-2">
+                  Máximo 5 imágenes, 5MB cada una
+                </p>
+              </div>
+
+              {/* Información de ubicación */}
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                <div className="flex items-start gap-3">
+                  <span className="text-gray-400">📍</span>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700">San Miguel de Allende</h4>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Límites: Latitud 20.85° - 21.05° | Longitud -100.85° - -100.60°
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-            <p className="text-xs text-gray-500 -mt-2">Hora de San Miguel de Allende (México)</p>
 
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                🏷️ Categoría *
-              </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition"
-              >
-                {categories.map(cat => (
-                  <option key={cat.name} value={cat.name}>
-                    {cat.icon} {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                🖼️ Imágenes del evento
-              </label>
-              <ImageUpload
-                onImagesSelected={handleImagesSelected}
-                images={images}
-                onRemoveImage={handleRemoveImage}
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                Las imágenes se comprimirán automáticamente. Haz clic en la X para eliminar imágenes existentes.
-              </p>
-            </div>
-
-            <div className="bg-yellow-50 p-4 rounded-xl">
-              <p className="text-sm text-yellow-800">
-                📍 <strong>San Miguel de Allende</strong><br />
-                Límites: Latitud 20.85° a 21.05° | Longitud -100.85° a -100.60°
-              </p>
-            </div>
-
-            <div className="flex gap-4 pt-4">
+            {/* Botones */}
+            <div className="bg-gray-50 px-6 py-4 flex flex-col sm:flex-row gap-3 border-t border-gray-100">
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-3 rounded-xl font-semibold hover:from-yellow-600 hover:to-orange-600 transition disabled:opacity-50"
+                className="flex-1 bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition disabled:opacity-50"
               >
-                {saving ? 'Guardando...' : '💾 Guardar Cambios'}
+                {saving ? 'Guardando...' : 'Guardar cambios'}
               </button>
               <button
                 type="button"
                 onClick={() => navigate(`/events/${id}`)}
-                className="px-6 py-3 bg-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-400 transition"
+                className="px-6 py-2 bg-white text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-100 transition border border-gray-200"
               >
                 Cancelar
               </button>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   );

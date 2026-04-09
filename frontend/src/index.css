@@ -54,3 +54,17 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+
+/* Ocultar en móvil y mostrar en desktop */
+@media (max-width: 480px) {
+  .xs\:inline {
+    display: inline;
+  }
+}
+
+@media (max-width: 640px) {
+  .hidden-xs {
+    display: none;
+  }
+}

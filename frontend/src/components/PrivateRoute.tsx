@@ -12,8 +12,11 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, allowedRoles }) =
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+        <div className="relative">
+          <div className="w-8 h-8 border-2 border-gray-200 rounded-full animate-spin border-t-gray-600"></div>
+        </div>
+        <p className="mt-4 text-gray-400 text-sm">Cargando...</p>
       </div>
     );
   }

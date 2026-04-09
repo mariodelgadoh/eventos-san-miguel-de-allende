@@ -133,21 +133,23 @@ const EventDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+        <div className="w-8 h-8 border-2 border-gray-200 rounded-full animate-spin border-t-gray-600"></div>
+        <p className="mt-4 text-gray-400 text-sm">Cargando evento...</p>
       </div>
     );
   }
 
   if (!event) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="bg-white rounded-2xl shadow-xl p-12 max-w-md mx-auto">
-          <div className="text-6xl mb-4">😢</div>
-          <h1 className="text-2xl font-bold text-gray-800">Evento no encontrado</h1>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg p-8 max-w-md w-full text-center">
+          <div className="text-5xl mb-4">📷</div>
+          <h1 className="text-xl font-medium text-gray-800 mb-2">Evento no encontrado</h1>
+          <p className="text-gray-500 text-sm mb-6">El evento que buscas no existe o fue eliminado</p>
           <button
             onClick={() => navigate('/events')}
-            className="mt-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition"
+            className="w-full bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition"
           >
             Ver todos los eventos
           </button>
@@ -165,135 +167,112 @@ const EventDetail: React.FC = () => {
     Religioso: '⛪',
   };
 
-  const categoryColors: Record<string, string> = {
-    Cultura: 'from-purple-500 to-pink-500',
-    Música: 'from-green-500 to-emerald-500',
-    Gastronomía: 'from-red-500 to-orange-500',
-    Arte: 'from-yellow-500 to-amber-500',
-    Deporte: 'from-blue-500 to-cyan-500',
-    Religioso: 'from-indigo-500 to-purple-500',
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-          {/* Galería de Imágenes */}
+        {/* Imagen principal y encabezado */}
+        <div className="bg-white rounded-lg border border-gray-100 overflow-hidden mb-6">
           {event.images && event.images.length > 0 ? (
             <div className="relative">
-              <div className="h-96 bg-gray-900 relative">
-                <img 
-                  src={event.images[0]} 
-                  alt={event.name}
-                  className="w-full h-full object-contain cursor-pointer"
-                  onClick={() => openLightbox(0)}
-                />
-                <button
-                  onClick={handleFavorite}
-                  className="absolute top-4 right-4 text-4xl transition transform hover:scale-110 z-10 bg-white bg-opacity-80 rounded-full p-2 shadow-lg"
-                >
-                  {isFavorite ? '❤️' : '🤍'}
-                </button>
-                {event.images.length > 1 && (
-                  <div className="absolute bottom-4 left-0 right-0 text-center">
-                    <div className="inline-flex gap-2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-                      1 / {event.images.length}
-                    </div>
-                  </div>
-                )}
-              </div>
-
+              <img 
+                src={event.images[currentImageIndex]} 
+                alt={event.name}
+                className="w-full h-96 object-cover cursor-pointer"
+                onClick={() => openLightbox(currentImageIndex)}
+              />
+              <button
+                onClick={handleFavorite}
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center text-xl hover:bg-white transition"
+              >
+                {isFavorite ? '❤️' : '🤍'}
+              </button>
+              
               {event.images.length > 1 && (
-                <div className="bg-white p-4">
-                  <div className="grid grid-cols-5 gap-2">
-                    {event.images.map((img, index) => (
-                      <div
-                        key={index}
-                        className={`cursor-pointer rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                          currentImageIndex === index 
-                            ? 'border-blue-500 shadow-lg transform scale-105' 
-                            : 'border-gray-200 hover:border-blue-300'
+                <div className="absolute bottom-4 left-4 right-4">
+                  <div className="flex gap-2 justify-center">
+                    {event.images.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentImageIndex(idx)}
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          idx === currentImageIndex ? 'bg-white w-6' : 'bg-white/60'
                         }`}
-                        onClick={() => {
-                          setCurrentImageIndex(index);
-                          const heroImage = document.querySelector('.h-96 img') as HTMLImageElement;
-                          if (heroImage) heroImage.src = img;
-                        }}
-                      >
-                        <img
-                          src={img}
-                          alt={`${event.name} - ${index + 1}`}
-                          className="w-full h-20 object-cover"
-                        />
-                      </div>
+                      />
                     ))}
                   </div>
                 </div>
               )}
             </div>
           ) : (
-            <div className={`h-80 bg-gradient-to-r ${categoryColors[event.category]} relative flex items-center justify-center`}>
-              <span className="text-9xl opacity-50">{categoryIcons[event.category]}</span>
+            <div className="h-64 bg-gray-100 flex items-center justify-center relative">
+              <span className="text-6xl opacity-30">{categoryIcons[event.category]}</span>
               <button
                 onClick={handleFavorite}
-                className="absolute top-4 right-4 text-4xl transition transform hover:scale-110 z-10"
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center text-xl hover:bg-white transition"
               >
                 {isFavorite ? '❤️' : '🤍'}
               </button>
             </div>
           )}
           
-          <div className="p-8">
-            <div className="flex flex-wrap gap-3 mb-4">
-              <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r ${categoryColors[event.category]} text-white`}>
-                {categoryIcons[event.category]} {event.category}
+          <div className="p-6">
+            <div className="flex flex-wrap gap-2 mb-4">
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                {event.category}
               </span>
               {event.isFeatured && (
-                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-yellow-400 to-yellow-600 text-white">
-                  ⭐ Destacado
+                <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
+                  Destacado
                 </span>
               )}
             </div>
             
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">{event.name}</h1>
+            <h1 className="text-3xl font-light text-gray-800 mb-4">{event.name}</h1>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="text-2xl">📅</div>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
                 <div>
-                  <p className="text-sm text-gray-500">Fecha y hora</p>
-                  <p className="font-semibold text-gray-800">
-                    {formatEventDateRange(event.startDate, event.endDate)}
-                  </p>
+                  <p className="text-xs text-gray-500">Fecha y hora</p>
+                  <p className="text-sm text-gray-800">{formatEventDateRange(event.startDate, event.endDate)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="text-2xl">📍</div>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
                 <div>
-                  <p className="text-sm text-gray-500">Ubicación</p>
-                  <p className="font-semibold text-gray-800">{event.address}</p>
+                  <p className="text-xs text-gray-500">Ubicación</p>
+                  <p className="text-sm text-gray-800">{event.address}</p>
                   <a 
                     href={`https://www.openstreetmap.org/?mlat=${event.coordinates.lat}&mlon=${event.coordinates.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:underline"
+                    className="text-xs text-blue-600 hover:underline"
                   >
                     Ver en mapa →
                   </a>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="text-2xl">👤</div>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
                 <div>
-                  <p className="text-sm text-gray-500">Organizador</p>
-                  <p className="font-semibold text-gray-800">{event.organizer?.name}</p>
+                  <p className="text-xs text-gray-500">Organizador</p>
+                  <p className="text-sm text-gray-800">{event.organizer?.name}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <div className="text-2xl">🌍</div>
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 <div>
-                  <p className="text-sm text-gray-500">Coordenadas</p>
-                  <p className="font-mono text-sm text-gray-600">
+                  <p className="text-xs text-gray-500">Coordenadas</p>
+                  <p className="text-xs text-gray-600">
                     {event.coordinates.lat}, {event.coordinates.lng}
                   </p>
                 </div>
@@ -301,184 +280,187 @@ const EventDetail: React.FC = () => {
             </div>
             
             <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                <span>📖</span> Descripción
-              </h2>
-              <p className="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap">
+              <h2 className="text-lg font-medium text-gray-800 mb-3">Descripción</h2>
+              <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
                 {event.description}
               </p>
             </div>
             
             {(isAdmin || (isOrganizer && event.organizer?._id === user?._id)) && (
-              <div className="flex gap-3 pt-6 border-t">
+              <div className="flex gap-3 pt-4 border-t border-gray-100">
                 <button
                   onClick={() => navigate(`/edit-event/${event._id}`)}
-                  className="flex-1 bg-yellow-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-yellow-600 transition"
+                  className="flex-1 bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition"
                 >
-                  ✏️ Editar evento
+                  Editar evento
                 </button>
                 <button
                   onClick={handleDeleteEvent}
-                  className="flex-1 bg-red-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-600 transition"
+                  className="flex-1 bg-red-50 text-red-600 py-2 rounded-lg text-sm font-medium hover:bg-red-100 transition"
                 >
-                  🗑️ Eliminar evento
+                  Eliminar evento
                 </button>
               </div>
             )}
           </div>
         </div>
 
-        {/* Lightbox Modal */}
-        {selectedImage && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center"
-            onClick={closeLightbox}
-          >
-            <div className="relative max-w-5xl max-h-screen p-4">
-              <img 
-                src={selectedImage} 
-                alt="Vista ampliada"
-                className="max-w-full max-h-screen object-contain"
-                onClick={(e) => e.stopPropagation()}
-              />
-              
-              <button
-                onClick={closeLightbox}
-                className="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 transition"
-              >
-                ✕
-              </button>
-              
-              {event.images && event.images.length > 1 && (
-                <>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      prevImage();
-                    }}
-                    disabled={currentImageIndex === 0}
-                    className={`absolute left-4 top-1/2 transform -translate-y-1/2 text-white text-4xl hover:text-gray-300 transition ${
-                      currentImageIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    ❮
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      nextImage();
-                    }}
-                    disabled={currentImageIndex === event.images.length - 1}
-                    className={`absolute right-4 top-1/2 transform -translate-y-1/2 text-white text-4xl hover:text-gray-300 transition ${
-                      currentImageIndex === event.images.length - 1 ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    ❯
-                  </button>
-                  
-                  <div className="absolute bottom-4 left-0 right-0 text-center">
-                    <div className="inline-flex gap-2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-full">
-                      {event.images.map((_, idx) => (
-                        <button
-                          key={idx}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setCurrentImageIndex(idx);
-                            setSelectedImage(event.images[idx]);
-                          }}
-                          className={`w-2 h-2 rounded-full transition ${
-                            idx === currentImageIndex ? 'bg-white w-4' : 'bg-gray-400'
-                          }`}
-                        />
-                      ))}
-                    </div>
+        {/* Sección de Comentarios */}
+        <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100">
+            <h2 className="text-lg font-medium text-gray-800">
+              Comentarios ({comments.length})
+            </h2>
+          </div>
+          
+          <div className="p-6">
+            {user ? (
+              <form onSubmit={handleAddComment} className="mb-8 bg-gray-50 p-5 rounded-lg">
+                <div className="mb-4">
+                  <label className="block text-sm text-gray-600 mb-2">Tu calificación</label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRating(star)}
+                        className="text-2xl transition"
+                      >
+                        <span className={star <= rating ? 'text-yellow-500' : 'text-gray-300'}>
+                          ★
+                        </span>
+                      </button>
+                    ))}
                   </div>
-                </>
+                </div>
+                <div className="mb-4">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Escribe tu comentario..."
+                    rows={3}
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition bg-white"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition"
+                >
+                  Publicar comentario
+                </button>
+              </form>
+            ) : (
+              <div className="bg-gray-50 p-5 rounded-lg text-center mb-8">
+                <p className="text-gray-500 text-sm">Inicia sesión para dejar un comentario</p>
+              </div>
+            )}
+            
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {comments.length > 0 ? (
+                comments.map(comment => (
+                  <div key={comment._id} className="border-b border-gray-100 pb-4 last:border-0">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
+                            {comment.user.name.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="font-medium text-gray-800 text-sm">{comment.user.name}</span>
+                        </div>
+                        <div className="flex gap-0.5 mt-1">
+                          {[...Array(5)].map((_, i) => (
+                            <span key={i} className={i < comment.rating ? 'text-yellow-500' : 'text-gray-300'}>
+                              ★
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {format(new Date(comment.createdAt), "d MMM yyyy", { locale: es })}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 text-sm mt-2">{comment.content}</p>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-400 text-sm">No hay comentarios aún. Sé el primero en comentar</p>
+                </div>
               )}
             </div>
           </div>
-        )}
+        </div>
+      </div>
 
-        {/* Comments Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <span>💬</span> Comentarios y Reseñas
-            <span className="text-sm text-gray-500 ml-2">({comments.length})</span>
-          </h2>
-          
-          {user ? (
-            <form onSubmit={handleAddComment} className="mb-8 bg-gray-50 p-6 rounded-xl">
-              <div className="mb-4">
-                <label className="block mb-2 font-semibold">Tu calificación:</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map(star => (
+      {/* Lightbox Modal */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          onClick={closeLightbox}
+        >
+          <div className="relative max-w-5xl max-h-screen p-4">
+            <img 
+              src={selectedImage} 
+              alt="Vista ampliada"
+              className="max-w-full max-h-[90vh] object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+            
+            <button
+              onClick={closeLightbox}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xl hover:bg-white/30 transition"
+            >
+              ✕
+            </button>
+            
+            {event.images && event.images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    prevImage();
+                  }}
+                  disabled={currentImageIndex === 0}
+                  className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xl transition hover:bg-white/30 ${
+                    currentImageIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  ❮
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    nextImage();
+                  }}
+                  disabled={currentImageIndex === event.images.length - 1}
+                  className={`absolute right-4 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xl transition hover:bg-white/30 ${
+                    currentImageIndex === event.images.length - 1 ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  ❯
+                </button>
+                
+                <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2">
+                  {event.images.map((_, idx) => (
                     <button
-                      key={star}
-                      type="button"
-                      onClick={() => setRating(star)}
-                      className="text-3xl transition transform hover:scale-110"
-                    >
-                      <span className={star <= rating ? 'text-yellow-500' : 'text-gray-300'}>
-                        ★
-                      </span>
-                    </button>
+                      key={idx}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentImageIndex(idx);
+                        setSelectedImage(event.images[idx]);
+                      }}
+                      className={`w-2 h-2 rounded-full transition ${
+                        idx === currentImageIndex ? 'bg-white' : 'bg-white/40 hover:bg-white/60'
+                      }`}
+                    />
                   ))}
                 </div>
-              </div>
-              <div className="mb-4">
-                <textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Escribe tu comentario..."
-                  rows={3}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition"
-              >
-                Publicar comentario
-              </button>
-            </form>
-          ) : (
-            <div className="bg-blue-50 p-6 rounded-xl text-center mb-8">
-              <p className="text-blue-800">🔐 Inicia sesión para dejar un comentario</p>
-            </div>
-          )}
-          
-          <div className="space-y-4 max-h-96 overflow-y-auto">
-            {comments.length > 0 ? (
-              comments.map(comment => (
-                <div key={comment._id} className="border-b border-gray-200 pb-4 last:border-0">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <span className="font-bold text-gray-800">{comment.user.name}</span>
-                      <div className="flex gap-1 mt-1">
-                        {[...Array(5)].map((_, i) => (
-                          <span key={i} className={i < comment.rating ? 'text-yellow-500' : 'text-gray-300'}>
-                            ★
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      {format(new Date(comment.createdAt), "d MMM yyyy", { locale: es })}
-                    </span>
-                  </div>
-                  <p className="text-gray-700 mt-2">{comment.content}</p>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <div className="text-5xl mb-3">💭</div>
-                <p className="text-gray-500">No hay comentarios aún. ¡Sé el primero en comentar!</p>
-              </div>
+              </>
             )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

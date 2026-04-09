@@ -5,11 +5,6 @@ import ImageCarousel from '../components/ImageCarousel';
 import { eventService } from '../services/api';
 import { Event } from '../types';
 
-// ============================================
-// 📸 AQUÍ PONES TUS IMÁGENES
-// ============================================
-// Coloca tus imágenes en: frontend/public/images/hero/
-// Luego lista los nombres de tus imágenes aquí:
 const heroImages = [
   '/images/hero/imagen1.jpg',
   '/images/hero/imagen2.jpg',
@@ -17,7 +12,6 @@ const heroImages = [
   '/images/hero/imagen4.jpg',
   '/images/hero/imagen5.jpg',
 ];
-// ============================================
 
 const Home: React.FC = () => {
   const [featuredEvents, setFeaturedEvents] = useState<Event[]>([]);
@@ -54,22 +48,22 @@ const Home: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64 sm:h-96">
-        <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-blue-600"></div>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+        <div className="w-8 h-8 border-2 border-gray-200 rounded-full animate-spin border-t-gray-600"></div>
+        <p className="mt-4 text-gray-400 text-sm">Cargando...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="bg-red-50 rounded-xl p-8 max-w-md mx-auto">
-          <div className="text-4xl mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold text-red-700 mb-2">Error</h2>
-          <p className="text-red-600">{error}</p>
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <h2 className="text-xl font-light text-gray-800 mb-2">Error</h2>
+          <p className="text-gray-500 mb-6">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+            className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition"
           >
             Reintentar
           </button>
@@ -79,121 +73,163 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section con Carrusel de Imágenes */}
-      <div className="relative h-screen max-h-[600px] sm:max-h-[700px] md:max-h-[800px] overflow-hidden">
+    <div className="bg-white">
+      {/* Hero Section */}
+      <div className="relative h-screen max-h-[650px] overflow-hidden">
         <ImageCarousel images={heroImages} interval={5000} />
         
-        <div className="relative z-10 flex items-center justify-center h-full text-white">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 animate-fade-in">
-              🎉 Descubre los mejores eventos
+        <div className="absolute inset-0 bg-black/30"></div>
+        
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-white px-4">
+          <div className="text-center max-w-3xl">
+            <p className="text-sm uppercase tracking-[0.3em] mb-4 font-light">San Miguel de Allende</p>
+            <h1 className="text-5xl md:text-7xl font-light mb-6 leading-tight">
+              Descubre lo que <span className="font-semibold">sucede</span>
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl mb-2 sm:mb-4">
-              en San Miguel de Allende
+            <p className="text-lg md:text-xl font-light mb-8 text-white/80">
+              Eventos culturales, musicales y gastronómicos en la ciudad más hermosa de México
             </p>
-            <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
-              Cultura, música, gastronomía, arte, deporte y eventos religiosos en la ciudad más hermosa de México
-            </p>
-            <Link
-              to="/events"
-              className="inline-block bg-white text-blue-600 px-6 sm:px-8 py-2 sm:py-3 rounded-full font-semibold hover:bg-gray-100 transition transform hover:scale-105 shadow-lg text-sm sm:text-base"
-            >
-              Explorar eventos →
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/events"
+                className="px-8 py-3 bg-white text-gray-900 rounded-full font-medium hover:bg-gray-100 transition shadow-lg"
+              >
+                Explorar eventos
+              </Link>
+              <Link
+                to="/create-event"
+                className="px-8 py-3 border border-white text-white rounded-full font-medium hover:bg-white/10 transition"
+              >
+                Crear evento
+              </Link>
+            </div>
+          </div>
+        </div>
+        
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="w-6 h-10 border border-white/50 rounded-full flex justify-center">
+            <div className="w-1 h-2 bg-white rounded-full mt-2"></div>
           </div>
         </div>
       </div>
 
       {/* Featured Events */}
       {featuredEvents.length > 0 && (
-        <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 md:mb-12">
-            ⭐ Eventos Destacados
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-            {featuredEvents.map((event) => (
-              <EventCard key={event._id} event={event} />
-            ))}
+        <div className="py-20 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <span className="text-sm uppercase tracking-wider text-gray-400">Lo mejor de SMA</span>
+              <h2 className="text-3xl md:text-4xl font-light mt-2">Eventos Destacados</h2>
+              <div className="w-12 h-0.5 bg-gray-300 mx-auto mt-4"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {featuredEvents.map((event) => (
+                <EventCard key={event._id} event={event} />
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Upcoming Events */}
-      <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16 bg-white">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-0">
-            📅 Próximos Eventos
-          </h2>
-          <Link to="/events" className="text-blue-600 hover:underline text-sm sm:text-base">
-            Ver todos →
-          </Link>
-        </div>
-        {upcomingEvents.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-            {upcomingEvents.map((event) => (
-              <EventCard key={event._id} event={event} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 sm:py-12 bg-gray-50 rounded-xl">
-            <p className="text-gray-500">No hay eventos próximos</p>
-            <Link
-              to="/create-event"
-              className="inline-block mt-3 text-blue-600 hover:underline text-sm sm:text-base"
-            >
-              ¡Crea el primer evento!
+      {/* Próximos Eventos */}
+      <div className="bg-gray-50 py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12">
+            <div>
+              <span className="text-sm uppercase tracking-wider text-gray-400">Calendario</span>
+              <h2 className="text-3xl md:text-4xl font-light mt-2">Próximos Eventos</h2>
+            </div>
+            <Link to="/events" className="mt-4 md:mt-0 text-gray-500 hover:text-gray-800 transition flex items-center gap-1">
+              Ver todos
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </Link>
           </div>
-        )}
+          
+          {upcomingEvents.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {upcomingEvents.map((event) => (
+                <EventCard key={event._id} event={event} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 bg-white rounded-2xl">
+              <p className="text-gray-500">No hay eventos programados</p>
+              <Link to="/create-event" className="inline-block mt-4 text-gray-600 hover:text-gray-900 underline">
+                Sé el primero en crear uno
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Past Events */}
+      {/* Eventos Pasados */}
       {pastEvents.length > 0 && (
-        <div className="container mx-auto px-4 py-8 sm:py-12 md:py-16 bg-gray-50">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-600 mb-3 sm:mb-0">
-              📜 Eventos que ya pasaron
-            </h2>
-            <Link to="/events" className="text-blue-600 hover:underline text-sm sm:text-base">
-              Ver todos →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-            {pastEvents.map((event) => (
-              <EventCard key={event._id} event={event} />
-            ))}
+        <div className="py-20 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <span className="text-sm uppercase tracking-wider text-gray-400">Recuerdos</span>
+              <h2 className="text-3xl md:text-4xl font-light mt-2">Eventos que ya pasaron</h2>
+              <div className="w-12 h-0.5 bg-gray-300 mx-auto mt-4"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {pastEvents.map((event) => (
+                <div key={event._id} className="opacity-70 hover:opacity-100 transition">
+                  <EventCard event={event} />
+                </div>
+              ))}
+            </div>
+            <div className="text-center mt-10">
+              <Link to="/events?tab=past" className="text-gray-500 hover:text-gray-800 transition">
+                Ver todos los eventos pasados →
+              </Link>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Categories Section */}
-      <div className="bg-white py-8 sm:py-12 md:py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 md:mb-12">
-            📂 Explora por categorías
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
+      {/* Categorías */}
+      <div className="bg-gray-50 py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <span className="text-sm uppercase tracking-wider text-gray-400">Intereses</span>
+            <h2 className="text-3xl md:text-4xl font-light mt-2">Explora por categoría</h2>
+            <div className="w-12 h-0.5 bg-gray-300 mx-auto mt-4"></div>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
-              { name: 'Cultura', icon: '🎭', color: 'purple' },
-              { name: 'Música', icon: '🎵', color: 'green' },
-              { name: 'Gastronomía', icon: '🍽️', color: 'red' },
-              { name: 'Arte', icon: '🎨', color: 'yellow' },
-              { name: 'Deporte', icon: '⚽', color: 'blue' },
-              { name: 'Religioso', icon: '⛪', color: 'indigo' },
+              { name: 'Cultura' },
+              { name: 'Música' },
+              { name: 'Gastronomía' },
+              { name: 'Arte' },
+              { name: 'Deporte' },
+              { name: 'Religioso' },
             ].map((category) => (
               <Link
                 key={category.name}
                 to={`/events?category=${category.name}`}
-                className={`bg-${category.color}-50 p-4 sm:p-6 text-center rounded-xl hover:shadow-lg transition transform hover:scale-105 border-2 border-${category.color}-200`}
+                className="group bg-white rounded-2xl p-6 text-center hover:shadow-md transition"
               >
-                <div className="text-3xl sm:text-4xl mb-1 sm:mb-2">{category.icon}</div>
-                <span className={`font-semibold text-${category.color}-700 text-xs sm:text-sm`}>
-                  {category.name}
-                </span>
+                <span className="text-gray-700 font-medium">{category.name}</span>
               </Link>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* CTA final */}
+      <div className="py-20 px-4 text-center">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-2xl font-light mb-2">¿Organizas un evento?</h2>
+          <p className="text-gray-500 mb-6">Comparte tu evento con la comunidad de San Miguel de Allende</p>
+          <Link
+            to="/create-event"
+            className="inline-block px-8 py-3 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition"
+          >
+            Crear evento
+          </Link>
         </div>
       </div>
     </div>

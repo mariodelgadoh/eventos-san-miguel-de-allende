@@ -60,7 +60,6 @@ const AdminPanel: React.FC = () => {
       setShowBlockModal(false);
       setBlockReason('');
       setSelectedUser(null);
-      alert('✅ Usuario bloqueado exitosamente');
     } catch (error: any) {
       console.error('Error blocking user:', error);
       alert(error.response?.data?.message || 'Error al bloquear usuario');
@@ -72,7 +71,6 @@ const AdminPanel: React.FC = () => {
       try {
         await adminService.unblockUser(userId);
         await fetchData();
-        alert('✅ Usuario desbloqueado exitosamente');
       } catch (error: any) {
         console.error('Error unblocking user:', error);
         alert(error.response?.data?.message || 'Error al desbloquear usuario');
@@ -81,11 +79,10 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleDeleteUser = async (userId: string, userName: string) => {
-    if (window.confirm(`⚠️ ¿Estás seguro de eliminar a ${userName}?\n\nSe eliminarán TODOS sus eventos, comentarios y favoritos. Esta acción no se puede deshacer.`)) {
+    if (window.confirm(`¿Estás seguro de eliminar a ${userName}? Se eliminarán TODOS sus eventos, comentarios y favoritos. Esta acción no se puede deshacer.`)) {
       try {
         await adminService.deleteUser(userId);
         await fetchData();
-        alert('✅ Usuario eliminado exitosamente');
       } catch (error: any) {
         console.error('Error deleting user:', error);
         alert(error.response?.data?.message || 'Error al eliminar usuario');
@@ -103,7 +100,6 @@ const AdminPanel: React.FC = () => {
       try {
         await adminService.updateUserRole(userId, newRole);
         await fetchData();
-        alert(`✅ Rol actualizado a: ${newRole === 'admin' ? 'Administrador' : 'Organizador'}`);
       } catch (error: any) {
         console.error('Error changing role:', error);
         alert(error.response?.data?.message || 'Error al cambiar rol');
@@ -113,128 +109,174 @@ const AdminPanel: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+        <div className="w-8 h-8 border-2 border-gray-200 rounded-full animate-spin border-t-gray-600"></div>
+        <p className="mt-4 text-gray-400 text-sm">Cargando panel...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
-      <div className="container mx-auto px-4 max-w-7xl">
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="bg-gradient-to-r from-red-600 to-red-800 rounded-2xl shadow-xl p-6 mb-8">
-          <h1 className="text-3xl font-bold text-white text-center">
-            👑 Panel de Administración
-          </h1>
-          <p className="text-red-100 text-center mt-2">
-            Gestión completa de usuarios, eventos y estadísticas
-          </p>
+        <div className="mb-8">
+          <h1 className="text-2xl font-light text-gray-800">Panel de Administración</h1>
+          <p className="text-gray-400 text-sm mt-1">Gestión completa de usuarios y eventos</p>
+          <div className="w-12 h-0.5 bg-gray-200 mt-3"></div>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-6">
+        <div className="flex gap-6 mb-6 border-b border-gray-200">
           <button
             onClick={() => setActiveTab('stats')}
-            className={`px-6 py-3 rounded-xl font-semibold transition ${
+            className={`pb-2 px-1 font-medium text-sm transition-colors ${
               activeTab === 'stats'
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
+                ? 'text-gray-900 border-b-2 border-gray-900'
+                : 'text-gray-400 hover:text-gray-600'
             }`}
           >
-            📊 Estadísticas
+            Estadísticas
           </button>
           <button
             onClick={() => setActiveTab('users')}
-            className={`px-6 py-3 rounded-xl font-semibold transition ${
+            className={`pb-2 px-1 font-medium text-sm transition-colors ${
               activeTab === 'users'
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
+                ? 'text-gray-900 border-b-2 border-gray-900'
+                : 'text-gray-400 hover:text-gray-600'
             }`}
           >
-            👥 Usuarios ({users.length})
+            Usuarios ({users.length})
           </button>
         </div>
 
         {/* Estadísticas */}
         {activeTab === 'stats' && stats && (
-          <div className="space-y-6 animate-fade-in">
-            {/* Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
-                <div className="text-4xl mb-2">👥</div>
-                <div className="text-2xl font-bold text-blue-600">{stats.totalUsers}</div>
-                <div className="text-gray-600">Usuarios Totales</div>
-                <div className="text-xs text-gray-500 mt-1">
-                  Admins: {stats.admins} | Organizadores: {stats.organizers}
+          <div className="space-y-6">
+            {/* Tarjetas */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="bg-white rounded-lg border border-gray-100 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-xs uppercase">Usuarios</p>
+                    <p className="text-2xl font-semibold text-gray-800 mt-1">{stats.totalUsers}</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 mt-2">Admins: {stats.admins} | Org: {stats.organizers}</p>
+              </div>
+
+              <div className="bg-white rounded-lg border border-gray-100 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-xs uppercase">Eventos</p>
+                    <p className="text-2xl font-semibold text-gray-800 mt-1">{stats.totalEvents}</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 mt-2">Activos: {stats.activeEvents} | Destacados: {stats.featuredEvents}</p>
+              </div>
+
+              <div className="bg-white rounded-lg border border-gray-100 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-xs uppercase">Comentarios</p>
+                    <p className="text-2xl font-semibold text-gray-800 mt-1">{stats.totalComments}</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                  </div>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
-                <div className="text-4xl mb-2">📅</div>
-                <div className="text-2xl font-bold text-green-600">{stats.totalEvents}</div>
-                <div className="text-gray-600">Eventos Totales</div>
-                <div className="text-xs text-gray-500 mt-1">
-                  Activos: {stats.activeEvents} | Destacados: {stats.featuredEvents}
+
+              <div className="bg-white rounded-lg border border-gray-100 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-xs uppercase">Favoritos</p>
+                    <p className="text-2xl font-semibold text-gray-800 mt-1">{stats.totalFavorites}</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  </div>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
-                <div className="text-4xl mb-2">💬</div>
-                <div className="text-2xl font-bold text-purple-600">{stats.totalComments}</div>
-                <div className="text-gray-600">Comentarios</div>
-              </div>
-              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
-                <div className="text-4xl mb-2">❤️</div>
-                <div className="text-2xl font-bold text-red-600">{stats.totalFavorites}</div>
-                <div className="text-gray-600">Favoritos</div>
-              </div>
-              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
-                <div className="text-4xl mb-2">🚫</div>
-                <div className="text-2xl font-bold text-orange-600">{stats.blockedUsers}</div>
-                <div className="text-gray-600">Usuarios Bloqueados</div>
+
+              <div className="bg-white rounded-lg border border-gray-100 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-xs uppercase">Bloqueados</p>
+                    <p className="text-2xl font-semibold text-gray-800 mt-1">{stats.blockedUsers}</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Eventos por categoría */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold mb-4">📊 Eventos por Categoría</h2>
-              <div className="space-y-3">
-                {stats.eventsByCategory.map(cat => (
-                  <div key={cat._id}>
-                    <div className="flex justify-between mb-1">
-                      <span className="font-medium">{cat._id}</span>
-                      <span className="text-gray-600">{cat.count} eventos</span>
+            <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+              <div className="px-5 py-3 border-b border-gray-100">
+                <h2 className="text-sm font-medium text-gray-700">Eventos por categoría</h2>
+              </div>
+              <div className="p-5">
+                <div className="space-y-3">
+                  {stats.eventsByCategory.map((cat) => (
+                    <div key={cat._id}>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-gray-600">{cat._id}</span>
+                        <span className="text-gray-400">{cat.count} eventos</span>
+                      </div>
+                      <div className="w-full bg-gray-100 rounded-full h-1">
+                        <div
+                          className="bg-gray-600 rounded-full h-1"
+                          style={{ width: `${(cat.count / stats.totalEvents) * 100}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-full h-2 transition-all"
-                        style={{ width: `${(cat.count / stats.totalEvents) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Top usuarios */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold mb-4">🏆 Usuarios Más Activos</h2>
-              <div className="space-y-3">
-                {stats.topUsers.length > 0 ? (
-                  stats.topUsers.map((user, idx) => (
-                    <div key={idx} className="flex justify-between items-center p-3 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg">
-                      <div>
-                        <div className="font-semibold text-gray-800">{user.name}</div>
-                        <div className="text-sm text-gray-500">{user.email}</div>
+            <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+              <div className="px-5 py-3 border-b border-gray-100">
+                <h2 className="text-sm font-medium text-gray-700">Usuarios más activos</h2>
+              </div>
+              <div className="p-5">
+                <div className="space-y-3">
+                  {stats.topUsers.length > 0 ? (
+                    stats.topUsers.map((user, idx) => (
+                      <div key={idx} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                        <div>
+                          <p className="text-sm font-medium text-gray-800">{user.name}</p>
+                          <p className="text-xs text-gray-400">{user.email}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-semibold text-gray-700">{user.eventCount}</p>
+                          <p className="text-xs text-gray-400">eventos</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-bold text-2xl text-blue-600">{user.eventCount}</div>
-                        <div className="text-xs text-gray-500">eventos</div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-gray-500">No hay datos suficientes</p>
-                )}
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-400 text-sm py-4">No hay datos suficientes</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -242,100 +284,116 @@ const AdminPanel: React.FC = () => {
 
         {/* Gestión de Usuarios */}
         {activeTab === 'users' && (
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="p-6 border-b bg-gray-50">
-              <input
-                type="text"
-                placeholder="🔍 Buscar usuarios por nombre o email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
-              />
+          <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <div className="relative">
+                <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Buscar usuarios..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition"
+                />
+              </div>
             </div>
             
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Usuario</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Rol</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Eventos</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Estado</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Registro</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Acciones</th>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-100">
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Usuario</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Email</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Rol</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500">Eventos</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Estado</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Registro</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-100">
                   {filteredUsers.map(user => (
-                    <tr key={user._id} className={`${user.isBlocked ? 'bg-red-50' : 'hover:bg-gray-50'} transition`}>
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900">{user.name}</div>
+                    <tr key={user._id} className={user.isBlocked ? 'bg-red-50/30' : 'hover:bg-gray-50'}>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
+                            {user.name.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="font-medium text-gray-800">{user.name}</span>
+                        </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-600">{user.email}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      <td className="px-4 py-3 text-gray-500">{user.email}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                           user.role === 'admin' 
-                            ? 'bg-red-100 text-red-800' 
-                            : 'bg-green-100 text-green-800'
+                            ? 'bg-gray-100 text-gray-700' 
+                            : 'bg-gray-50 text-gray-500'
                         }`}>
-                          {user.role === 'admin' ? '👑 Admin' : '📝 Organizador'}
+                          {user.role === 'admin' ? 'Admin' : 'Organizador'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="font-semibold text-blue-600">{user.eventsCount || 0}</span>
-                      </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3 text-center text-gray-600">{user.eventsCount || 0}</td>
+                      <td className="px-4 py-3">
                         {user.isBlocked ? (
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
-                            🚫 Bloqueado
-                          </span>
+                          <span className="text-xs text-red-600">Bloqueado</span>
                         ) : (
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                            ✅ Activo
-                          </span>
+                          <span className="text-xs text-green-600">Activo</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-gray-600 text-sm">
+                      <td className="px-4 py-3 text-gray-400 text-xs">
                         {format(new Date(user.createdAt), "dd/MM/yyyy", { locale: es })}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex gap-2 flex-wrap">
+                      <td className="px-4 py-3">
+                        <div className="flex gap-1 justify-center">
                           {!user.isBlocked ? (
                             <button
                               onClick={() => {
                                 setSelectedUser(user);
                                 setShowBlockModal(true);
                               }}
-                              className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600 transition"
+                              className="p-1 text-gray-400 hover:text-red-600 transition"
+                              title="Bloquear"
                             >
-                              Bloquear
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                              </svg>
                             </button>
                           ) : (
                             <button
                               onClick={() => handleUnblockUser(user._id)}
-                              className="px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600 transition"
+                              className="p-1 text-gray-400 hover:text-green-600 transition"
+                              title="Desbloquear"
                             >
-                              Desbloquear
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                              </svg>
                             </button>
                           )}
                           {user.role !== 'admin' && (
                             <button
                               onClick={() => handleDeleteUser(user._id, user.name)}
-                              className="px-3 py-1 bg-red-700 text-white rounded-lg text-sm hover:bg-red-800 transition"
+                              className="p-1 text-gray-400 hover:text-red-600 transition"
+                              title="Eliminar"
                             >
-                              Eliminar
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
                             </button>
                           )}
                           <button
                             onClick={() => handleChangeRole(user._id, user.role)}
-                            className={`px-3 py-1 rounded-lg text-sm transition ${
+                            className={`p-1 transition ${
                               user.role === 'admin'
-                                ? 'bg-yellow-500 text-white hover:bg-yellow-600'
-                                : 'bg-blue-500 text-white hover:bg-blue-600'
+                                ? 'text-gray-400 hover:text-yellow-600'
+                                : 'text-gray-400 hover:text-blue-600'
                             }`}
+                            title={user.role === 'admin' ? 'Quitar Admin' : 'Hacer Admin'}
                           >
-                            {user.role === 'admin' ? 'Quitar Admin' : 'Hacer Admin'}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
                           </button>
                         </div>
                       </td>
@@ -344,8 +402,8 @@ const AdminPanel: React.FC = () => {
                 </tbody>
               </table>
               {filteredUsers.length === 0 && (
-                <div className="text-center py-12 text-gray-500">
-                  No se encontraron usuarios
+                <div className="text-center py-8">
+                  <p className="text-gray-400 text-sm">No se encontraron usuarios</p>
                 </div>
               )}
             </div>
@@ -355,42 +413,41 @@ const AdminPanel: React.FC = () => {
 
       {/* Modal para bloquear usuario */}
       {showBlockModal && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fade-in">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
-            <div className="text-center mb-4">
-              <div className="text-5xl mb-2">🚫</div>
-              <h2 className="text-xl font-bold text-gray-800">Bloquear Usuario</h2>
-            </div>
-            <p className="text-gray-600 mb-4 text-center">
-              ¿Estás seguro de bloquear a <strong className="text-red-600">{selectedUser.name}</strong>?
-            </p>
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-2 font-medium">Motivo del bloqueo:</label>
-              <textarea
-                value={blockReason}
-                onChange={(e) => setBlockReason(e.target.value)}
-                rows={3}
-                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200 transition"
-                placeholder="Ej: Publicación de contenido inapropiado, spam, acoso..."
-              />
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={handleBlockUser}
-                className="flex-1 bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition"
-              >
-                Bloquear Usuario
-              </button>
-              <button
-                onClick={() => {
-                  setShowBlockModal(false);
-                  setSelectedUser(null);
-                  setBlockReason('');
-                }}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-400 transition"
-              >
-                Cancelar
-              </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-lg max-w-md w-full">
+            <div className="p-6">
+              <h2 className="text-lg font-medium text-gray-800 mb-2">Bloquear usuario</h2>
+              <p className="text-sm text-gray-500 mb-4">
+                ¿Estás seguro de bloquear a <span className="font-medium text-gray-700">{selectedUser.name}</span>?
+              </p>
+              <div className="mb-4">
+                <label className="block text-sm text-gray-600 mb-1">Motivo</label>
+                <textarea
+                  value={blockReason}
+                  onChange={(e) => setBlockReason(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition resize-none"
+                  placeholder="Motivo del bloqueo..."
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleBlockUser}
+                  className="flex-1 bg-gray-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition"
+                >
+                  Bloquear
+                </button>
+                <button
+                  onClick={() => {
+                    setShowBlockModal(false);
+                    setSelectedUser(null);
+                    setBlockReason('');
+                  }}
+                  className="flex-1 bg-gray-100 text-gray-600 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition"
+                >
+                  Cancelar
+                </button>
+              </div>
             </div>
           </div>
         </div>

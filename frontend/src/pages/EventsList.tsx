@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import EventCard from '../components/EventCard';
+import EventCarousel from '../components/EventCarousel';
 import { eventService, favoriteService } from '../services/api';
 import { Event } from '../types';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 const EventsList: React.FC = () => {
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [pastEvents, setPastEvents] = useState<Event[]>([]);
+  const [carouselEvents, setCarouselEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -16,8 +18,14 @@ const EventsList: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
 
-  // ✅ CATEGORÍAS COMPLETAS CON RELIGIOSO
-  const categories = ['Cultura', 'Música', 'Gastronomía', 'Arte', 'Deporte', 'Religioso'];
+  const categories = [
+    { name: 'Cultura' },
+    { name: 'Música' },
+    { name: 'Gastronomía' },
+    { name: 'Arte' },
+    { name: 'Deporte' },
+    { name: 'Religioso' },
+  ];
 
   useEffect(() => {
     const categoryParam = searchParams.get('category');
@@ -49,6 +57,7 @@ const EventsList: React.FC = () => {
       ]);
       setUpcomingEvents(upcoming);
       setPastEvents(past);
+      setCarouselEvents(upcoming.slice(0, 5));
     } catch (error) {
       console.error('Error fetching events:', error);
     } finally {
@@ -110,119 +119,147 @@ const EventsList: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64 sm:h-96">
-        <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-blue-600"></div>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+        <div className="w-8 h-8 border-2 border-gray-200 rounded-full animate-spin border-t-gray-600"></div>
+        <p className="mt-4 text-gray-400 text-sm">Cargando eventos...</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 sm:mb-8">
-          📅 Eventos en San Miguel de Allende
-        </h1>
-        
-        <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4">
-          <div className="flex gap-2 sm:gap-4">
-            <input
-              type="text"
-              placeholder="🔍 Buscar eventos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm sm:text-base"
-            />
-          </div>
-          
-          <div className="flex flex-wrap gap-1.5 sm:gap-2">
-            <button
-              onClick={() => setSelectedCategory('')}
-              className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm transition ${
-                selectedCategory === '' 
-                  ? 'bg-blue-600 text-white shadow-md' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              Todos
-            </button>
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm transition ${
-                  selectedCategory === cat 
-                    ? 'bg-blue-600 text-white shadow-md' 
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs responsivos */}
-      <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-8 border-b">
-        <button
-          onClick={() => setActiveTab('upcoming')}
-          className={`pb-2 sm:pb-3 px-2 sm:px-4 font-semibold text-sm sm:text-base transition ${
-            activeTab === 'upcoming'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          📅 Próximos ({filteredUpcoming.length})
-        </button>
-        <button
-          onClick={() => setActiveTab('past')}
-          className={`pb-2 sm:pb-3 px-2 sm:px-4 font-semibold text-sm sm:text-base transition ${
-            activeTab === 'past'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          📜 Pasados ({filteredPast.length})
-        </button>
-      </div>
-
-      {/* Eventos Grid */}
-      {currentEvents.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
-          {currentEvents.map(event => (
-            <EventCard
-              key={event._id}
-              event={event}
-              onFavorite={() => handleFavorite(event._id)}
-              isFavorite={favorites.includes(event._id)}
-            />
-          ))}
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Carrusel de Eventos */}
+      {carouselEvents.length > 0 ? (
+        <EventCarousel events={carouselEvents} interval={6000} />
       ) : (
-        <div className="text-center py-8 sm:py-12 md:py-16 bg-white rounded-xl shadow-md">
-          <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">
-            {activeTab === 'upcoming' ? '📭' : '📜'}
+        <div className="h-screen bg-gray-800 flex items-center justify-center text-white">
+          <div className="text-center">
+            <h2 className="text-2xl font-light mb-2">Próximamente</h2>
+            <p className="text-gray-400 text-sm">Pronto habrá nuevos eventos en San Miguel de Allende</p>
           </div>
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-2">
-            {activeTab === 'upcoming' 
-              ? 'No hay eventos próximos' 
-              : 'No hay eventos pasados'}
-          </h2>
-          <p className="text-gray-500 text-sm sm:text-base px-4">
-            {activeTab === 'upcoming' 
-              ? '¡Sé el primero en crear un evento!' 
-              : 'Los eventos pasados aparecerán aquí cuando finalicen'}
-          </p>
-          {activeTab === 'upcoming' && (
-            <Link
-              to="/create-event"
-              className="inline-block mt-4 sm:mt-6 bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base hover:bg-blue-700 transition"
-            >
-              Crear evento
-            </Link>
-          )}
         </div>
       )}
+
+      {/* Búsqueda y lista de eventos */}
+      <div className="container mx-auto px-4 py-12 max-w-7xl">
+        {/* Tarjeta de Búsqueda */}
+        <div className="bg-white rounded-lg border border-gray-100 p-6 mb-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="relative mb-6">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Buscar eventos por nombre o descripción..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400 transition bg-gray-50"
+              />
+            </div>
+            
+            <div className="flex flex-wrap gap-2 justify-center">
+              <button
+                onClick={() => setSelectedCategory('')}
+                className={`px-4 py-2 rounded-full text-sm transition-colors ${
+                  selectedCategory === '' 
+                    ? 'bg-gray-900 text-white' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Todos
+              </button>
+              {categories.map(cat => (
+                <button
+                  key={cat.name}
+                  onClick={() => setSelectedCategory(cat.name)}
+                  className={`px-4 py-2 rounded-full text-sm transition-colors ${
+                    selectedCategory === cat.name 
+                      ? 'bg-gray-900 text-white' 
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex justify-center gap-4 mb-8">
+          <button
+            onClick={() => setActiveTab('upcoming')}
+            className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === 'upcoming'
+                ? 'bg-gray-900 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              Próximos
+              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                activeTab === 'upcoming' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-500'
+              }`}>
+                {filteredUpcoming.length}
+              </span>
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('past')}
+            className={`px-6 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === 'past'
+                ? 'bg-gray-900 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+            }`}
+          >
+            <span className="flex items-center gap-2">
+              Pasados
+              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                activeTab === 'past' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-500'
+              }`}>
+                {filteredPast.length}
+              </span>
+            </span>
+          </button>
+        </div>
+
+        {/* Grid de Eventos */}
+        {currentEvents.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {currentEvents.map(event => (
+              <div key={event._id} className="transition-all duration-300 hover:-translate-y-1">
+                <EventCard
+                  event={event}
+                  onFavorite={() => handleFavorite(event._id)}
+                  isFavorite={favorites.includes(event._id)}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg border border-gray-100 p-12 text-center">
+            <h2 className="text-xl font-medium text-gray-700 mb-2">
+              {activeTab === 'upcoming' ? 'No hay eventos próximos' : 'No hay eventos pasados'}
+            </h2>
+            <p className="text-gray-400 text-sm mb-6">
+              {activeTab === 'upcoming' 
+                ? 'Sé el primero en crear un evento' 
+                : 'Los eventos pasados aparecerán aquí cuando finalicen'}
+            </p>
+            {activeTab === 'upcoming' && (
+              <Link
+                to="/create-event"
+                className="inline-block bg-gray-900 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 transition"
+              >
+                Crear evento
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
