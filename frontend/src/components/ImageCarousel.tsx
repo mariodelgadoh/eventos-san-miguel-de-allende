@@ -68,12 +68,12 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, interval = 5000 }
         </div>
       )}
 
-      {/* Flechas de navegación */}
+      {/* Flechas de navegación - Ocultas en móvil */}
       {images.length > 1 && (
         <>
           <button
             onClick={() => goToSlide((currentIndex - 1 + images.length) % images.length)}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-all duration-300"
+            className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm items-center justify-center text-white hover:bg-white/20 transition-all duration-300"
             aria-label="Imagen anterior"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,7 +82,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, interval = 5000 }
           </button>
           <button
             onClick={() => goToSlide((currentIndex + 1) % images.length)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-all duration-300"
+            className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm items-center justify-center text-white hover:bg-white/20 transition-all duration-300"
             aria-label="Imagen siguiente"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,13 +90,6 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images, interval = 5000 }
             </svg>
           </button>
         </>
-      )}
-
-      {/* Contador de imágenes */}
-      {images.length > 1 && (
-        <div className="absolute top-4 right-4 z-20 px-2 py-1 rounded-full bg-black/30 backdrop-blur-sm text-white text-xs">
-          {currentIndex + 1} / {images.length}
-        </div>
       )}
     </div>
   );

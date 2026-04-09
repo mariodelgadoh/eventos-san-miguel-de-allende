@@ -105,12 +105,6 @@ const Home: React.FC = () => {
             </div>
           </div>
         </div>
-        
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-          <div className="w-6 h-10 border border-white/50 rounded-full flex justify-center">
-            <div className="w-1 h-2 bg-white rounded-full mt-2"></div>
-          </div>
-        </div>
       </div>
 
       {/* Featured Events */}
@@ -134,17 +128,18 @@ const Home: React.FC = () => {
       {/* Próximos Eventos */}
       <div className="bg-gray-50 py-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-12">
-            <div>
-              <span className="text-sm uppercase tracking-wider text-gray-400">Calendario</span>
-              <h2 className="text-3xl md:text-4xl font-light mt-2">Próximos Eventos</h2>
+          <div className="text-center mb-12">
+            <span className="text-sm uppercase tracking-wider text-gray-400">Calendario</span>
+            <h2 className="text-3xl md:text-4xl font-light mt-2">Próximos Eventos</h2>
+            <div className="w-12 h-0.5 bg-gray-300 mx-auto mt-4"></div>
+            <div className="mt-4">
+              <Link to="/events" className="text-gray-500 hover:text-gray-800 transition inline-flex items-center gap-1">
+                Ver todos
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
             </div>
-            <Link to="/events" className="mt-4 md:mt-0 text-gray-500 hover:text-gray-800 transition flex items-center gap-1">
-              Ver todos
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
           </div>
           
           {upcomingEvents.length > 0 ? (
@@ -163,31 +158,6 @@ const Home: React.FC = () => {
           )}
         </div>
       </div>
-
-      {/* Eventos Pasados */}
-      {pastEvents.length > 0 && (
-        <div className="py-20 px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-              <span className="text-sm uppercase tracking-wider text-gray-400">Recuerdos</span>
-              <h2 className="text-3xl md:text-4xl font-light mt-2">Eventos que ya pasaron</h2>
-              <div className="w-12 h-0.5 bg-gray-300 mx-auto mt-4"></div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {pastEvents.map((event) => (
-                <div key={event._id} className="opacity-70 hover:opacity-100 transition">
-                  <EventCard event={event} />
-                </div>
-              ))}
-            </div>
-            <div className="text-center mt-10">
-              <Link to="/events?tab=past" className="text-gray-500 hover:text-gray-800 transition">
-                Ver todos los eventos pasados →
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Categorías */}
       <div className="bg-gray-50 py-20 px-4">
