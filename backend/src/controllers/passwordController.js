@@ -144,6 +144,9 @@ exports.resetPassword = async (req, res) => {
   try {
     const { email, code, newPassword } = req.body;
     
+    console.log('🔐 Restableciendo contraseña para:', email);
+    console.log('📝 Nueva contraseña (longitud):', newPassword.length);
+    
     if (!email || !code || !newPassword) {
       return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
@@ -162,11 +165,24 @@ exports.resetPassword = async (req, res) => {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
     
-    // Hashear la nueva contraseña
+    // Hashear la nueva contraseña correctamente
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
+    
+    console.log('🔑 Hash generado:', hashedPassword.substring(0, 30) + '...');
+    
+    // Guardar la nueva contraseña
     user.password = hashedPassword;
     await user.save();
+    
+    // Verificar que se guardó correctamente
+    const savedUser = await User.findOne({ email });
+    const isMatch = await bcrypt.compare(newPassword, savedUser.password);
+    console.log('✅ Verificación de contraseña guardada:', isMatch ? 'OK' : 'FALLO');
+    
+    if (!isMatch) {
+      console.log('⚠️ ADVERTENCIA: La contraseña no se verificó correctamente');
+    }
     
     console.log('✅ Contraseña actualizada para:', email);
     
