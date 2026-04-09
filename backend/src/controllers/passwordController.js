@@ -9,7 +9,10 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
+  connectionTimeout: 30000,
+  greetingTimeout: 30000,
+  socketTimeout: 30000
 });
 
 // Generar código de 6 dígitos
@@ -94,7 +97,9 @@ exports.requestPasswordReset = async (req, res) => {
     // Guardar en la base de datos
     await PasswordReset.create({ email, code });
     
-    console.log('📧 Código generado para', email, ':', code);
+    console.log('=========================================');
+    console.log(`📧 CÓDIGO DE VERIFICACIÓN PARA ${email}: ${code}`);
+    console.log('=========================================');
     
     // Intentar enviar el correo
     const emailSent = await sendVerificationEmail(email, code);
@@ -102,11 +107,9 @@ exports.requestPasswordReset = async (req, res) => {
     if (emailSent) {
       res.json({ message: 'Código de verificación enviado a tu correo' });
     } else {
-      // Si falla el envío, devolvemos el código para pruebas
       res.json({ 
-        message: 'Código generado (no se pudo enviar el correo)',
-        code: code,
-        email: email
+        message: 'Código generado (revisa los logs de Render)',
+        code: code
       });
     }
   } catch (error) {
@@ -160,14 +163,15 @@ exports.resetPassword = async (req, res) => {
     }
     
     // Hashear la nueva contraseña
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
     user.password = hashedPassword;
     await user.save();
     
+    console.log('✅ Contraseña actualizada para:', email);
+    
     // Eliminar el código usado
     await PasswordReset.deleteOne({ _id: resetRequest._id });
-    
-    console.log('✅ Contraseña actualizada para:', email);
     
     res.json({ message: 'Contraseña actualizada exitosamente' });
   } catch (error) {

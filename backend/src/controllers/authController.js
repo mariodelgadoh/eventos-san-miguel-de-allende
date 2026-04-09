@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -36,25 +37,31 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    const user = await User.findOne({ email });
     
+    console.log('🔐 Intento de login para:', email);
+    
+    const user = await User.findOne({ email });
     if (!user) {
+      console.log('❌ Usuario no encontrado:', email);
       return res.status(401).json({ message: 'Email o contraseña incorrectos' });
     }
     
     if (user.isBlocked) {
       return res.status(403).json({ 
         message: 'Tu cuenta ha sido bloqueada',
-        reason: user.blockedReason,
-        blockedAt: user.blockedAt
+        reason: user.blockedReason
       });
     }
     
-    if (!(await user.comparePassword(password))) {
+    // Verificar contraseña
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      console.log('❌ Contraseña incorrecta para:', email);
       return res.status(401).json({ message: 'Email o contraseña incorrectos' });
     }
-
+    
+    console.log('✅ Login exitoso para:', email);
+    
     user.lastLogin = new Date();
     await user.save();
 
@@ -66,6 +73,7 @@ exports.login = async (req, res) => {
       token: generateToken(user._id)
     });
   } catch (error) {
+    console.error('Error en login:', error);
     res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
 };

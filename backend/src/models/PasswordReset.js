@@ -13,7 +13,7 @@ const passwordResetSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
-    expires: 600 // Expira en 10 minutos (600 segundos)
+    expires: 600
   }
 });
 
