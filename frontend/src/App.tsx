@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import ToastProvider from './contexts/ToastContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import EventsList from './pages/EventsList';
@@ -16,50 +17,52 @@ import PrivateRoute from './components/PrivateRoute';
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <div className="min-h-screen bg-gray-50">
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/events" element={<EventsList />} />
-            <Route path="/events/:id" element={<EventDetail />} />
-            <Route
-              path="/create-event"
-              element={
-                <PrivateRoute allowedRoles={['organizer', 'admin']}>
-                  <CreateEvent />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/edit-event/:id"
-              element={
-                <PrivateRoute allowedRoles={['organizer', 'admin']}>
-                  <EditEvent />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/favorites"
-              element={
-                <PrivateRoute>
-                  <Favorites />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <PrivateRoute allowedRoles={['admin']}>
-                  <AdminPanel />
-                </PrivateRoute>
-              }
-            />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-          </Routes>
-        </div>
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <div className="min-h-screen bg-gray-50">
+            <Navbar />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/events" element={<EventsList />} />
+              <Route path="/events/:id" element={<EventDetail />} />
+              <Route
+                path="/create-event"
+                element={
+                  <PrivateRoute allowedRoles={['organizer', 'admin']}>
+                    <CreateEvent />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/edit-event/:id"
+                element={
+                  <PrivateRoute allowedRoles={['organizer', 'admin']}>
+                    <EditEvent />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/favorites"
+                element={
+                  <PrivateRoute>
+                    <Favorites />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <PrivateRoute allowedRoles={['admin']}>
+                    <AdminPanel />
+                  </PrivateRoute>
+                }
+              />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+            </Routes>
+          </div>
+        </AuthProvider>
+      </ToastProvider>
     </Router>
   );
 }
