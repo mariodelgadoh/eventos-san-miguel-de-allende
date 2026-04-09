@@ -69,12 +69,12 @@ const CreateEvent: React.FC = () => {
   });
 
   const categories = [
-    { name: 'Cultura', icon: '🎭' },
-    { name: 'Música', icon: '🎵' },
-    { name: 'Gastronomía', icon: '🍽️' },
-    { name: 'Arte', icon: '🎨' },
-    { name: 'Deporte', icon: '⚽' },
-    { name: 'Religioso', icon: '⛪' },
+    { name: 'Cultura' },
+    { name: 'Música' },
+    { name: 'Gastronomía' },
+    { name: 'Arte' },
+    { name: 'Deporte' },
+    { name: 'Religioso' },
   ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -266,10 +266,10 @@ const CreateEvent: React.FC = () => {
               </div>
               <p className="text-xs text-gray-400 -mt-2">Hora de San Miguel de Allende (México)</p>
 
-              {/* Categorías */}
+              {/* Categorías - Centradas y responsivas */}
               <div>
-                <label className="block text-gray-600 text-sm mb-2">Categoría *</label>
-                <div className="flex flex-wrap gap-2">
+                <label className="block text-gray-600 text-sm mb-3 text-center">Categoría *</label>
+                <div className="flex flex-wrap gap-2 justify-center">
                   {categories.map(cat => (
                     <button
                       key={cat.name}
@@ -281,7 +281,6 @@ const CreateEvent: React.FC = () => {
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
-                      <span className="mr-1">{cat.icon}</span>
                       {cat.name}
                     </button>
                   ))}
