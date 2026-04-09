@@ -28,13 +28,17 @@ const eventSchema = new mongoose.Schema({
     type: String,
     default: []
   }],
-  date: {
+  startDate: {
+    type: Date,
+    required: true
+  },
+  endDate: {
     type: Date,
     required: true
   },
   category: {
     type: String,
-    enum: ['Cultura', 'Música', 'Gastronomía', 'Arte', 'Deporte'],
+    enum: ['Cultura', 'Música', 'Gastronomía', 'Arte', 'Deporte', 'Religioso'],
     required: true
   },
   organizer: {
@@ -68,6 +72,12 @@ eventSchema.pre('save', function(next) {
   if (!isValidLat || !isValidLng) {
     next(new Error('Las coordenadas deben estar dentro de San Miguel de Allende'));
   }
+  
+  // Validar que endDate sea mayor que startDate
+  if (this.endDate <= this.startDate) {
+    next(new Error('La fecha de fin debe ser posterior a la fecha de inicio'));
+  }
+  
   next();
 });
 

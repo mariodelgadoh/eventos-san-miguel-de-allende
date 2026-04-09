@@ -2,7 +2,7 @@ const Event = require('../models/Event');
 
 exports.createEvent = async (req, res) => {
   try {
-    const { name, description, address, coordinates, images, date, category } = req.body;
+    const { name, description, address, coordinates, images, startDate, endDate, category } = req.body;
     
     const event = await Event.create({
       name,
@@ -10,7 +10,8 @@ exports.createEvent = async (req, res) => {
       address,
       coordinates,
       images: images || [],
-      date,
+      startDate,
+      endDate,
       category,
       organizer: req.user._id
     });
@@ -28,14 +29,14 @@ exports.getEvents = async (req, res) => {
     
     const now = new Date();
     
-    // Filtrar por tipo de evento
+    // Filtrar por tipo de evento basado en endDate
     if (type === 'upcoming') {
-      // Eventos futuros (fecha >= ahora)
-      filter.date = { $gte: now };
+      // Eventos futuros (endDate >= ahora)
+      filter.endDate = { $gte: now };
       filter.isActive = true;
     } else if (type === 'past') {
-      // Eventos pasados (fecha < ahora)
-      filter.date = { $lt: now };
+      // Eventos pasados (endDate < ahora)
+      filter.endDate = { $lt: now };
     } else {
       // Si no se especifica tipo, mostrar todos activos
       filter.isActive = true;
@@ -45,14 +46,14 @@ exports.getEvents = async (req, res) => {
     if (category) filter.category = category;
     if (featured === 'true') filter.isFeatured = true;
     if (startDate || endDate) {
-      filter.date = filter.date || {};
-      if (startDate) filter.date.$gte = new Date(startDate);
-      if (endDate) filter.date.$lte = new Date(endDate);
+      filter.startDate = filter.startDate || {};
+      if (startDate) filter.startDate.$gte = new Date(startDate);
+      if (endDate) filter.startDate.$lte = new Date(endDate);
     }
 
     const events = await Event.find(filter)
       .populate('organizer', 'name email')
-      .sort({ date: type === 'past' ? -1 : 1 });
+      .sort({ startDate: type === 'past' ? -1 : 1 });
 
     res.json(events);
   } catch (error) {
@@ -96,6 +97,15 @@ exports.updateEvent = async (req, res) => {
       if (!isValidLat || !isValidLng) {
         return res.status(400).json({ 
           message: 'Las coordenadas deben estar dentro de San Miguel de Allende' 
+        });
+      }
+    }
+
+    // Validar fechas
+    if (req.body.endDate && req.body.startDate) {
+      if (new Date(req.body.endDate) <= new Date(req.body.startDate)) {
+        return res.status(400).json({ 
+          message: 'La fecha de fin debe ser posterior a la fecha de inicio' 
         });
       }
     }
@@ -148,12 +158,12 @@ exports.toggleFeatured = async (req, res) => {
   }
 };
 
-// Función para archivar eventos pasados (opcional)
+// Función para actualizar eventos pasados automáticamente
 exports.archivePastEvents = async () => {
   try {
     const now = new Date();
     const result = await Event.updateMany(
-      { date: { $lt: now }, isActive: true },
+      { endDate: { $lt: now }, isActive: true },
       { isActive: false }
     );
     console.log(`📦 ${result.modifiedCount} eventos archivados automáticamente`);
