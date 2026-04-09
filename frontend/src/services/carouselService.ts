@@ -1,6 +1,16 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// Forzar la URL del backend en producción
+const getApiUrl = () => {
+  if (window.location.hostname !== 'localhost') {
+    return 'https://eventos-san-miguel-de-allende.onrender.com/api';
+  }
+  return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+};
+
+const API_URL = getApiUrl();
+
+console.log('Carousel API URL:', API_URL);
 
 const api = axios.create({
   baseURL: API_URL,
@@ -26,15 +36,11 @@ export interface CarouselImage {
 }
 
 export const carouselService = {
-  // Público - siempre devuelve un array
   getCarouselImages: async (): Promise<CarouselImage[]> => {
     try {
       const response = await api.get('/carousel');
-      // Asegurar que siempre devuelve un array
       if (Array.isArray(response.data)) {
         return response.data;
-      } else if (response.data && typeof response.data === 'object') {
-        return [response.data];
       }
       return [];
     } catch (error) {
@@ -43,7 +49,6 @@ export const carouselService = {
     }
   },
   
-  // Admin
   getAllCarouselImages: async (): Promise<CarouselImage[]> => {
     try {
       const response = await api.get('/carousel/admin');
