@@ -31,8 +31,16 @@ const Home: React.FC = () => {
         setUpcomingEvents(Array.isArray(upcoming) ? upcoming.slice(0, 6) : []);
         setPastEvents(Array.isArray(past) ? past.slice(0, 3) : []);
         
-        // Convertir las imágenes del carrusel a array de URLs
-        const imageUrls = (carousel as CarouselImage[]).map(img => img.imageUrl);
+        // Verificar que carousel es un array
+        let imageUrls: string[] = [];
+        if (Array.isArray(carousel)) {
+          imageUrls = carousel.map((img: CarouselImage) => img.imageUrl);
+        } else if (carousel && typeof carousel === 'object' && (carousel as any).imageUrl) {
+          // Si es un objeto único, convertirlo a array
+          imageUrls = [(carousel as any).imageUrl];
+        }
+        
+        // Si no hay imágenes, usar las de respaldo
         setCarouselImages(imageUrls.length > 0 ? imageUrls : [
           '/images/hero/imagen1.jpg',
           '/images/hero/imagen2.jpg',
@@ -43,6 +51,14 @@ const Home: React.FC = () => {
       } catch (error) {
         console.error('Error fetching data:', error);
         setError('Error al cargar eventos');
+        // Usar imágenes de respaldo en caso de error
+        setCarouselImages([
+          '/images/hero/imagen1.jpg',
+          '/images/hero/imagen2.jpg',
+          '/images/hero/imagen3.jpg',
+          '/images/hero/imagen4.jpg',
+          '/images/hero/imagen5.jpg',
+        ]);
       } finally {
         setLoading(false);
       }

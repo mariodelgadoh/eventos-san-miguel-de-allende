@@ -26,16 +26,35 @@ export interface CarouselImage {
 }
 
 export const carouselService = {
-  // Público
+  // Público - siempre devuelve un array
   getCarouselImages: async (): Promise<CarouselImage[]> => {
-    const response = await api.get('/carousel');
-    return response.data;
+    try {
+      const response = await api.get('/carousel');
+      // Asegurar que siempre devuelve un array
+      if (Array.isArray(response.data)) {
+        return response.data;
+      } else if (response.data && typeof response.data === 'object') {
+        return [response.data];
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching carousel images:', error);
+      return [];
+    }
   },
   
   // Admin
   getAllCarouselImages: async (): Promise<CarouselImage[]> => {
-    const response = await api.get('/carousel/admin');
-    return response.data;
+    try {
+      const response = await api.get('/carousel/admin');
+      if (Array.isArray(response.data)) {
+        return response.data;
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching all carousel images:', error);
+      return [];
+    }
   },
   
   addCarouselImage: async (formData: FormData): Promise<CarouselImage> => {
