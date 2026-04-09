@@ -10,7 +10,6 @@ const eventRoutes = require('./routes/eventRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-const passwordRoutes = require('./routes/passwordRoutes');
 
 dotenv.config();
 
@@ -27,7 +26,6 @@ app.use('/api/events', eventRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/password', passwordRoutes);
 
 app.get('/api/test', (req, res) => {
   res.json({ 
