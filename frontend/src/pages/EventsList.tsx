@@ -55,11 +55,14 @@ const EventsList: React.FC = () => {
         eventService.getEvents({ type: 'upcoming' }),
         eventService.getEvents({ type: 'past' })
       ]);
-      setUpcomingEvents(upcoming);
-      setPastEvents(past);
-      setCarouselEvents(upcoming.slice(0, 5));
+      setUpcomingEvents(upcoming || []);
+      setPastEvents(past || []);
+      setCarouselEvents((upcoming || []).slice(0, 5));
     } catch (error) {
       console.error('Error fetching events:', error);
+      setUpcomingEvents([]);
+      setPastEvents([]);
+      setCarouselEvents([]);
     } finally {
       setLoading(false);
     }
@@ -68,28 +71,31 @@ const EventsList: React.FC = () => {
   const fetchFavorites = async () => {
     try {
       const favs = await favoriteService.getFavorites();
-      setFavorites(favs.map(f => f.event._id));
+      // Filtrar favoritos que tengan evento válido
+      const validFavs = favs.filter(f => f.event && f.event._id);
+      setFavorites(validFavs.map(f => f.event._id));
     } catch (error) {
       console.error('Error fetching favorites:', error);
+      setFavorites([]);
     }
   };
 
   const filterEvents = () => {
-    let filteredUpcoming = [...upcomingEvents];
-    let filteredPast = [...pastEvents];
+    let filteredUpcoming = [...(upcomingEvents || [])];
+    let filteredPast = [...(pastEvents || [])];
     
     if (searchTerm) {
       const filterFn = (event: Event) =>
-        event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchTerm.toLowerCase());
+        event && (event.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.description?.toLowerCase().includes(searchTerm.toLowerCase()));
       
       filteredUpcoming = filteredUpcoming.filter(filterFn);
       filteredPast = filteredPast.filter(filterFn);
     }
     
     if (selectedCategory) {
-      filteredUpcoming = filteredUpcoming.filter(event => event.category === selectedCategory);
-      filteredPast = filteredPast.filter(event => event.category === selectedCategory);
+      filteredUpcoming = filteredUpcoming.filter(event => event && event.category === selectedCategory);
+      filteredPast = filteredPast.filter(event => event && event.category === selectedCategory);
     }
     
     return { filteredUpcoming, filteredPast };

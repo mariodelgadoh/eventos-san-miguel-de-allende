@@ -19,6 +19,8 @@ const EventDetail: React.FC = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     if (id) {
@@ -29,6 +31,17 @@ const EventDetail: React.FC = () => {
       }
     }
   }, [id, user]);
+
+  // Auto-play del carrusel
+  useEffect(() => {
+    if (!event?.images || event.images.length <= 1 || !isAutoPlaying) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % event.images.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [event?.images, isAutoPlaying]);
 
   const fetchEvent = async () => {
     try {
@@ -107,28 +120,44 @@ const EventDetail: React.FC = () => {
   };
 
   const openLightbox = (index: number) => {
-    setCurrentImageIndex(index);
+    setIsAutoPlaying(false);
+    setLightboxIndex(index);
     setSelectedImage(event?.images[index] || null);
   };
 
   const closeLightbox = () => {
     setSelectedImage(null);
+    setIsAutoPlaying(true);
   };
 
-  const nextImage = () => {
-    if (event?.images && currentImageIndex < event.images.length - 1) {
-      const newIndex = currentImageIndex + 1;
-      setCurrentImageIndex(newIndex);
+  const lightboxNextImage = () => {
+    if (event?.images && lightboxIndex < event.images.length - 1) {
+      const newIndex = lightboxIndex + 1;
+      setLightboxIndex(newIndex);
+      setSelectedImage(event.images[newIndex]);
+    } else if (event?.images) {
+      const newIndex = 0;
+      setLightboxIndex(newIndex);
       setSelectedImage(event.images[newIndex]);
     }
   };
 
-  const prevImage = () => {
-    if (event?.images && currentImageIndex > 0) {
-      const newIndex = currentImageIndex - 1;
-      setCurrentImageIndex(newIndex);
+  const lightboxPrevImage = () => {
+    if (event?.images && lightboxIndex > 0) {
+      const newIndex = lightboxIndex - 1;
+      setLightboxIndex(newIndex);
+      setSelectedImage(event.images[newIndex]);
+    } else if (event?.images) {
+      const newIndex = event.images.length - 1;
+      setLightboxIndex(newIndex);
       setSelectedImage(event.images[newIndex]);
     }
+  };
+
+  const goToImage = (index: number) => {
+    setIsAutoPlaying(false);
+    setCurrentImageIndex(index);
+    setTimeout(() => setIsAutoPlaying(true), 5000);
   };
 
   if (loading) {
@@ -170,32 +199,39 @@ const EventDetail: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
-        {/* Imagen principal y encabezado */}
+        {/* Imagen principal y encabezado con carrusel automático */}
         <div className="bg-white rounded-lg border border-gray-100 overflow-hidden mb-6">
           {event.images && event.images.length > 0 ? (
             <div className="relative">
-              <img 
-                src={event.images[currentImageIndex]} 
-                alt={event.name}
-                className="w-full h-96 object-cover cursor-pointer"
-                onClick={() => openLightbox(currentImageIndex)}
-              />
-              <button
-                onClick={handleFavorite}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center text-xl hover:bg-white transition"
-              >
-                {isFavorite ? '❤️' : '🤍'}
-              </button>
+              {/* Imagen principal */}
+              <div className="relative">
+                <img 
+                  src={event.images[currentImageIndex]} 
+                  alt={event.name}
+                  className="w-full h-96 object-cover cursor-pointer transition-opacity duration-500"
+                  onClick={() => openLightbox(currentImageIndex)}
+                />
+                
+                <button
+                  onClick={handleFavorite}
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center text-xl hover:bg-white transition"
+                >
+                  {isFavorite ? '❤️' : '🤍'}
+                </button>
+              </div>
               
+              {/* Indicadores de posición */}
               {event.images.length > 1 && (
-                <div className="absolute bottom-4 left-4 right-4">
+                <div className="absolute bottom-4 left-0 right-0">
                   <div className="flex gap-2 justify-center">
                     {event.images.map((_, idx) => (
                       <button
                         key={idx}
-                        onClick={() => setCurrentImageIndex(idx)}
-                        className={`w-2 h-2 rounded-full transition-all ${
-                          idx === currentImageIndex ? 'bg-white w-6' : 'bg-white/60'
+                        onClick={() => goToImage(idx)}
+                        className={`transition-all duration-300 rounded-full ${
+                          idx === currentImageIndex 
+                            ? 'w-6 h-1.5 bg-white' 
+                            : 'w-3 h-1.5 bg-white/50 hover:bg-white/70'
                         }`}
                       />
                     ))}
@@ -393,23 +429,23 @@ const EventDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* Lightbox Modal */}
+      {/* Lightbox Modal - CON FLECHAS MÁS OSCURAS */}
       {selectedImage && (
         <div 
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
           onClick={closeLightbox}
         >
-          <div className="relative max-w-5xl max-h-screen p-4">
+          <div className="relative max-w-6xl max-h-screen p-4">
             <img 
               src={selectedImage} 
               alt="Vista ampliada"
-              className="max-w-full max-h-[90vh] object-contain"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
               onClick={(e) => e.stopPropagation()}
             />
             
             <button
               onClick={closeLightbox}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xl hover:bg-white/30 transition"
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white text-xl hover:bg-black/80 transition-all duration-300 hover:scale-110"
             >
               ✕
             </button>
@@ -419,44 +455,60 @@ const EventDetail: React.FC = () => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    prevImage();
+                    lightboxPrevImage();
                   }}
-                  disabled={currentImageIndex === 0}
-                  className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xl transition hover:bg-white/30 ${
-                    currentImageIndex === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                  disabled={lightboxIndex === 0}
+                  className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white text-2xl transition-all duration-300 hover:bg-black/80 hover:scale-110 ${
+                    lightboxIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''
                   }`}
                 >
-                  ❮
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                  </svg>
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    nextImage();
+                    lightboxNextImage();
                   }}
-                  disabled={currentImageIndex === event.images.length - 1}
-                  className={`absolute right-4 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xl transition hover:bg-white/30 ${
-                    currentImageIndex === event.images.length - 1 ? 'opacity-50 cursor-not-allowed' : ''
+                  disabled={lightboxIndex === event.images.length - 1}
+                  className={`absolute right-4 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white text-2xl transition-all duration-300 hover:bg-black/80 hover:scale-110 ${
+                    lightboxIndex === event.images.length - 1 ? 'opacity-30 cursor-not-allowed' : ''
                   }`}
                 >
-                  ❯
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
-                
-                <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2">
-                  {event.images.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCurrentImageIndex(idx);
-                        setSelectedImage(event.images[idx]);
-                      }}
-                      className={`w-2 h-2 rounded-full transition ${
-                        idx === currentImageIndex ? 'bg-white' : 'bg-white/40 hover:bg-white/60'
-                      }`}
-                    />
-                  ))}
-                </div>
               </>
+            )}
+            
+            {/* Indicadores de posición */}
+            {event.images && event.images.length > 1 && (
+              <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2">
+                {event.images.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightboxIndex(idx);
+                      setSelectedImage(event.images[idx]);
+                    }}
+                    className={`transition-all duration-300 rounded-full ${
+                      idx === lightboxIndex 
+                        ? 'w-8 h-1.5 bg-white' 
+                        : 'w-4 h-1.5 bg-white/40 hover:bg-white/60'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+            
+            {/* Contador de imágenes */}
+            {event.images && event.images.length > 1 && (
+              <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 text-white text-xs font-medium">
+                {lightboxIndex + 1} / {event.images.length}
+              </div>
             )}
           </div>
         </div>
