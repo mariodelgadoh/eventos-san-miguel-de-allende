@@ -103,7 +103,6 @@ const CreateEvent: React.FC = () => {
       const localStartDate = new Date(formData.startDate);
       const localEndDate = new Date(formData.endDate);
       
-      // Validar que endDate sea mayor que startDate
       if (localEndDate <= localStartDate) {
         alert('❌ La fecha de fin debe ser posterior a la fecha de inicio');
         setLoading(false);
@@ -131,15 +130,17 @@ const CreateEvent: React.FC = () => {
         category: formData.category,
       };
 
+      console.log('Enviando evento:', eventData);
       await eventService.createEvent(eventData);
       alert('✅ Evento creado exitosamente');
       navigate('/events');
     } catch (error: any) {
       console.error('Error:', error);
+      console.error('Respuesta del servidor:', error.response?.data);
       if (error.response?.status === 413) {
         alert('Las imágenes son demasiado grandes. Por favor usa imágenes más pequeñas (menos de 500KB cada una)');
       } else {
-        alert(error.response?.data?.message || 'Error al crear el evento');
+        alert(error.response?.data?.message || error.response?.data?.error || 'Error al crear el evento');
       }
     } finally {
       setLoading(false);
@@ -268,7 +269,7 @@ const CreateEvent: React.FC = () => {
                 />
               </div>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Hora de San Miguel de Allende (México)</p>
+            <p className="text-xs text-gray-500 -mt-2">Hora de San Miguel de Allende (México)</p>
 
             <div>
               <label className="block text-gray-700 font-semibold mb-2">
