@@ -17,6 +17,7 @@ api.interceptors.request.use((config) => {
 export interface CarouselImage {
   _id: string;
   imageUrl: string;
+  filename?: string;
   title: string;
   order: number;
   isActive: boolean;
@@ -37,13 +38,17 @@ export const carouselService = {
     return response.data;
   },
   
-  addCarouselImage: async (imageData: { imageUrl: string; title: string; order: number }): Promise<CarouselImage> => {
-    const response = await api.post('/carousel', imageData);
+  addCarouselImage: async (formData: FormData): Promise<CarouselImage> => {
+    const response = await api.post('/carousel', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
     return response.data;
   },
   
-  updateCarouselImage: async (id: string, imageData: Partial<CarouselImage>): Promise<CarouselImage> => {
-    const response = await api.put(`/carousel/${id}`, imageData);
+  updateCarouselImage: async (id: string, formData: FormData): Promise<CarouselImage> => {
+    const response = await api.put(`/carousel/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
     return response.data;
   },
   

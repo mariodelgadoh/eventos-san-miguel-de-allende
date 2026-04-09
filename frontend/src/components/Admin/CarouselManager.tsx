@@ -7,6 +7,8 @@ const CarouselManager: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingImage, setEditingImage] = useState<CarouselImage | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
   const [formData, setFormData] = useState({
     imageUrl: '',
     title: '',
@@ -30,32 +32,54 @@ const CarouselManager: React.FC = () => {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('La imagen no puede superar los 5MB', 'error');
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        showToast('Solo se permiten archivos de imagen', 'error');
+        return;
+      }
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.imageUrl) {
-      showToast('Debes ingresar una URL de imagen', 'error');
-      return;
-    }
-    
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('order', formData.order.toString());
+      
+      if (selectedFile) {
+        formDataToSend.append('image', selectedFile);
+      } else if (formData.imageUrl) {
+        formDataToSend.append('imageUrl', formData.imageUrl);
+      } else {
+        showToast('Debes seleccionar una imagen o ingresar una URL', 'error');
+        return;
+      }
+
       if (editingImage) {
-        await carouselService.updateCarouselImage(editingImage._id, {
-          imageUrl: formData.imageUrl,
-          title: formData.title,
-          order: formData.order
-        });
+        await carouselService.updateCarouselImage(editingImage._id, formDataToSend);
         showToast('Imagen actualizada exitosamente', 'success');
       } else {
-        await carouselService.addCarouselImage({
-          imageUrl: formData.imageUrl,
-          title: formData.title,
-          order: formData.order
-        });
+        await carouselService.addCarouselImage(formDataToSend);
         showToast('Imagen agregada exitosamente', 'success');
       }
+      
       setShowModal(false);
       setEditingImage(null);
+      setSelectedFile(null);
+      setPreviewUrl('');
       setFormData({ imageUrl: '', title: '', order: images.length });
       fetchImages();
     } catch (error) {
@@ -80,16 +104,20 @@ const CarouselManager: React.FC = () => {
   const handleEdit = (image: CarouselImage) => {
     setEditingImage(image);
     setFormData({
-      imageUrl: image.imageUrl,
+      imageUrl: image.imageUrl || '',
       title: image.title || '',
       order: image.order
     });
+    setPreviewUrl(image.imageUrl);
+    setSelectedFile(null);
     setShowModal(true);
   };
 
   const handleToggleActive = async (image: CarouselImage) => {
     try {
-      await carouselService.updateCarouselImage(image._id, { isActive: !image.isActive });
+      const formDataToSend = new FormData();
+      formDataToSend.append('isActive', (!image.isActive).toString());
+      await carouselService.updateCarouselImage(image._id, formDataToSend);
       showToast(`Imagen ${image.isActive ? 'desactivada' : 'activada'} exitosamente`, 'success');
       fetchImages();
     } catch (error) {
@@ -133,6 +161,8 @@ const CarouselManager: React.FC = () => {
           <button
             onClick={() => {
               setEditingImage(null);
+              setSelectedFile(null);
+              setPreviewUrl('');
               setFormData({ imageUrl: '', title: '', order: images.length });
               setShowModal(true);
             }}
@@ -145,7 +175,7 @@ const CarouselManager: React.FC = () => {
 
       <div className="mb-4 p-3 bg-blue-50 rounded-lg">
         <p className="text-sm text-blue-800">
-          Puedes agregar imágenes usando URLs externas. Las 5 imágenes originales están guardadas y puedes restaurarlas.
+          Puedes subir imágenes desde tu computadora (JPG, PNG, GIF, WEBP) hasta 5MB, o usar URLs externas.
         </p>
       </div>
 
@@ -154,7 +184,6 @@ const CarouselManager: React.FC = () => {
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100">
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Imagen</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">URL</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Título</th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500">Orden</th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500">Estado</th>
@@ -170,15 +199,13 @@ const CarouselManager: React.FC = () => {
                     alt={image.title} 
                     className="w-20 h-14 object-cover rounded-lg shadow-sm"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://placehold.co/80x60?text=Error';
+                      (e.target as HTMLImageElement).src = 'https://placehold.co/80x60?text=Imagen';
                     }}
                   />
                 </td>
-                <td className="px-4 py-3 text-gray-600 max-w-xs">
-                  <div className="text-xs text-gray-500 truncate max-w-[200px]">{image.imageUrl}</div>
-                </td>
                 <td className="px-4 py-3 text-gray-600">
                   <div className="font-medium text-gray-800">{image.title || `Imagen ${idx + 1}`}</div>
+                  <div className="text-xs text-gray-400 truncate max-w-[200px]">{image.filename ? 'Archivo local' : image.imageUrl?.substring(0, 50)}</div>
                 </td>
                 <td className="px-4 py-3 text-center text-gray-600">{image.order}</td>
                 <td className="px-4 py-3 text-center">
@@ -228,27 +255,42 @@ const CarouselManager: React.FC = () => {
       {/* Modal para agregar/editar */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-medium text-gray-800 mb-4">
               {editingImage ? 'Editar imagen' : 'Agregar imagen'}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-gray-600 text-sm mb-1">URL de la imagen *</label>
+                <label className="block text-gray-600 text-sm mb-1">Subir imagen (JPG, PNG, GIF, WEBP)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
+                />
+                <p className="text-xs text-gray-400 mt-1">Máximo 5MB</p>
+              </div>
+              
+              {previewUrl && (
+                <div className="mt-2">
+                  <img src={previewUrl} alt="Preview" className="w-32 h-24 object-cover rounded-lg" />
+                </div>
+              )}
+              
+              <div className="text-center text-gray-400 text-sm">o</div>
+              
+              <div>
+                <label className="block text-gray-600 text-sm mb-1">URL de la imagen</label>
                 <input
                   type="text"
                   value={formData.imageUrl}
                   onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
-                  required
                   placeholder="https://ejemplo.com/imagen.jpg"
+                  disabled={!!selectedFile}
                 />
-                {formData.imageUrl && (
-                  <div className="mt-2">
-                    <img src={formData.imageUrl} alt="Preview" className="w-32 h-20 object-cover rounded-lg" />
-                  </div>
-                )}
               </div>
+              
               <div>
                 <label className="block text-gray-600 text-sm mb-1">Título (opcional)</label>
                 <input
@@ -259,6 +301,7 @@ const CarouselManager: React.FC = () => {
                   placeholder="Título de la imagen"
                 />
               </div>
+              
               <div>
                 <label className="block text-gray-600 text-sm mb-1">Orden</label>
                 <input
@@ -268,6 +311,7 @@ const CarouselManager: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
                 />
               </div>
+              
               <div className="flex gap-3 pt-2">
                 <button
                   type="submit"
@@ -280,6 +324,8 @@ const CarouselManager: React.FC = () => {
                   onClick={() => {
                     setShowModal(false);
                     setEditingImage(null);
+                    setSelectedFile(null);
+                    setPreviewUrl('');
                   }}
                   className="flex-1 bg-gray-100 text-gray-600 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition"
                 >
