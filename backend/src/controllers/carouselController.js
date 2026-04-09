@@ -2,6 +2,19 @@ const CarouselImage = require('../models/CarouselImage');
 const fs = require('fs');
 const path = require('path');
 
+// Función para reordenar todas las imágenes
+const reorderAllImages = async () => {
+  const allImages = await CarouselImage.find().sort({ order: 1, createdAt: 1 });
+  let currentOrder = 0;
+  for (const img of allImages) {
+    img.order = currentOrder;
+    await img.save();
+    currentOrder++;
+  }
+  console.log(`📸 ${allImages.length} imágenes reordenadas automáticamente`);
+  return allImages;
+};
+
 // Obtener todas las imágenes activas (público)
 exports.getCarouselImages = async (req, res) => {
   try {
@@ -38,7 +51,7 @@ exports.getAllCarouselImages = async (req, res) => {
   }
 };
 
-// Agregar nueva imagen (con archivo o URL)
+// Agregar nueva imagen
 exports.addCarouselImage = async (req, res) => {
   try {
     const { title, order, imageUrl } = req.body;
@@ -46,7 +59,6 @@ exports.addCarouselImage = async (req, res) => {
     
     if (req.file) {
       filename = req.file.filename;
-      console.log('Archivo guardado:', filename);
     }
     
     if (!filename && !imageUrl) {
@@ -88,13 +100,12 @@ exports.updateCarouselImage = async (req, res) => {
     
     const updateData = {
       title: title || '',
-      order: order || 0,
+      order: order !== undefined ? order : 0,
       isActive: isActive !== undefined ? isActive : true,
       updatedAt: Date.now()
     };
     
     if (filename) {
-      // Si hay un nuevo archivo, eliminar el anterior
       const oldImage = await CarouselImage.findById(id);
       if (oldImage && oldImage.filename) {
         const oldFilePath = path.join(__dirname, '../../uploads', oldImage.filename);
@@ -137,16 +148,15 @@ exports.deleteCarouselImage = async (req, res) => {
       return res.status(404).json({ message: 'Imagen no encontrada' });
     }
     
-    // Eliminar archivo físico si existe
     if (image.filename) {
       const filePath = path.join(__dirname, '../../uploads', image.filename);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
-        console.log('Archivo eliminado:', filePath);
       }
     }
     
     await CarouselImage.findByIdAndDelete(id);
+    
     res.json({ message: 'Imagen eliminada exitosamente' });
   } catch (error) {
     console.error('Error deleteCarouselImage:', error);
@@ -154,10 +164,44 @@ exports.deleteCarouselImage = async (req, res) => {
   }
 };
 
+// Reordenar imágenes manualmente
+exports.reorderCarouselImages = async (req, res) => {
+  try {
+    const { orderMap } = req.body;
+    
+    if (orderMap) {
+      for (const [id, order] of Object.entries(orderMap)) {
+        await CarouselImage.findByIdAndUpdate(id, { order: parseInt(order), updatedAt: Date.now() });
+      }
+    }
+    
+    const allImages = await CarouselImage.find().sort({ order: 1 });
+    let currentOrder = 0;
+    for (const img of allImages) {
+      img.order = currentOrder;
+      await img.save();
+      currentOrder++;
+    }
+    
+    const images = await CarouselImage.find().sort({ order: 1 });
+    const imagesWithUrl = images.map(img => {
+      const imgObj = img.toObject();
+      if (imgObj.filename && !imgObj.imageUrl) {
+        imgObj.imageUrl = `${req.protocol}://${req.get('host')}/uploads/${imgObj.filename}`;
+      }
+      return imgObj;
+    });
+    
+    res.json(imagesWithUrl);
+  } catch (error) {
+    console.error('Error reorderCarouselImages:', error);
+    res.status(500).json({ message: 'Error al reordenar imágenes', error: error.message });
+  }
+};
+
 // Inicializar imágenes por defecto
 exports.initializeDefaultImages = async (req, res) => {
   try {
-    // Eliminar todas las imágenes existentes y sus archivos
     const existingImages = await CarouselImage.find();
     for (const img of existingImages) {
       if (img.filename) {
