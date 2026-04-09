@@ -1,9 +1,13 @@
 const User = require('../models/User');
 const PasswordReset = require('../models/PasswordReset');
-const { sendVerificationEmail, generateCode } = require('../config/mailer');
 const bcrypt = require('bcryptjs');
 
-// Solicitar código de recuperación
+// Generar código de 6 dígitos
+const generateCode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// Solicitar código de recuperación (versión temporal SIN correo)
 exports.requestPasswordReset = async (req, res) => {
   try {
     const { email } = req.body;
@@ -26,13 +30,20 @@ exports.requestPasswordReset = async (req, res) => {
     // Guardar en la base de datos
     await PasswordReset.create({ email, code });
     
-    // Enviar correo
-    await sendVerificationEmail(email, code);
+    // Mostrar el código en la consola de Render
+    console.log('=========================================');
+    console.log(`📧 CÓDIGO DE VERIFICACIÓN PARA ${email}: ${code}`);
+    console.log('=========================================');
     
-    res.json({ message: 'Código de verificación enviado a tu correo' });
+    // Devolver el código en la respuesta para pruebas
+    res.json({ 
+      message: 'Código generado correctamente (modo desarrollo)',
+      code: code,
+      email: email
+    });
   } catch (error) {
     console.error('Error en requestPasswordReset:', error);
-    res.status(500).json({ message: 'Error al enviar el código', error: error.message });
+    res.status(500).json({ message: 'Error al generar el código', error: error.message });
   }
 };
 
