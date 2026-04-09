@@ -2,22 +2,53 @@ const Event = require('../models/Event');
 
 exports.createEvent = async (req, res) => {
   try {
+    console.log('📝 Creando evento...');
+    console.log('📦 Datos recibidos:', JSON.stringify(req.body, null, 2));
+    
     const { name, description, address, coordinates, images, startDate, endDate, category } = req.body;
+    
+    // Validaciones manuales
+    if (!name) {
+      return res.status(400).json({ message: 'El nombre es obligatorio' });
+    }
+    if (!description) {
+      return res.status(400).json({ message: 'La descripción es obligatoria' });
+    }
+    if (!address) {
+      return res.status(400).json({ message: 'La dirección es obligatoria' });
+    }
+    if (!coordinates || !coordinates.lat || !coordinates.lng) {
+      return res.status(400).json({ message: 'Las coordenadas son obligatorias' });
+    }
+    if (!startDate) {
+      return res.status(400).json({ message: 'La fecha de inicio es obligatoria' });
+    }
+    if (!endDate) {
+      return res.status(400).json({ message: 'La fecha de fin es obligatoria' });
+    }
+    if (!category) {
+      return res.status(400).json({ message: 'La categoría es obligatoria' });
+    }
     
     const event = await Event.create({
       name,
       description,
       address,
-      coordinates,
+      coordinates: {
+        lat: coordinates.lat,
+        lng: coordinates.lng
+      },
       images: images || [],
-      startDate,
-      endDate,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
       category,
       organizer: req.user._id
     });
 
+    console.log('✅ Evento creado:', event._id);
     res.status(201).json(event);
   } catch (error) {
+    console.error('❌ Error al crear evento:', error);
     res.status(500).json({ message: 'Error al crear evento', error: error.message });
   }
 };
@@ -29,7 +60,6 @@ exports.getEvents = async (req, res) => {
     
     const now = new Date();
     
-    // Filtrar por tipo de evento basado en endDate
     if (type === 'upcoming') {
       filter.endDate = { $gte: now };
       filter.isActive = true;
@@ -88,7 +118,6 @@ exports.updateEvent = async (req, res) => {
 
     const updateData = { ...req.body };
     
-    // Si el frontend envió 'date' (estructura vieja), lo ignoramos
     if (updateData.date) {
       delete updateData.date;
     }
