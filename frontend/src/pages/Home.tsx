@@ -3,47 +3,52 @@ import { Link } from 'react-router-dom';
 import EventCard from '../components/EventCard';
 import ImageCarousel from '../components/ImageCarousel';
 import { eventService } from '../services/api';
+import { carouselService, CarouselImage } from '../services/carouselService';
 import { Event } from '../types';
-
-const heroImages = [
-  '/images/hero/imagen1.jpg',
-  '/images/hero/imagen2.jpg',
-  '/images/hero/imagen3.jpg',
-  '/images/hero/imagen4.jpg',
-  '/images/hero/imagen5.jpg',
-];
 
 const Home: React.FC = () => {
   const [featuredEvents, setFeaturedEvents] = useState<Event[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [pastEvents, setPastEvents] = useState<Event[]>([]);
+  const [carouselImages, setCarouselImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        const [featured, upcoming, past] = await Promise.all([
+        const [featured, upcoming, past, carousel] = await Promise.all([
           eventService.getEvents({ featured: true }).catch(() => []),
           eventService.getEvents({ type: 'upcoming' }).catch(() => []),
-          eventService.getEvents({ type: 'past' }).catch(() => [])
+          eventService.getEvents({ type: 'past' }).catch(() => []),
+          carouselService.getCarouselImages().catch(() => [])
         ]);
         
         setFeaturedEvents(Array.isArray(featured) ? featured.slice(0, 3) : []);
         setUpcomingEvents(Array.isArray(upcoming) ? upcoming.slice(0, 6) : []);
         setPastEvents(Array.isArray(past) ? past.slice(0, 3) : []);
+        
+        // Convertir las imágenes del carrusel a array de URLs
+        const imageUrls = (carousel as CarouselImage[]).map(img => img.imageUrl);
+        setCarouselImages(imageUrls.length > 0 ? imageUrls : [
+          '/images/hero/imagen1.jpg',
+          '/images/hero/imagen2.jpg',
+          '/images/hero/imagen3.jpg',
+          '/images/hero/imagen4.jpg',
+          '/images/hero/imagen5.jpg',
+        ]);
       } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error('Error fetching data:', error);
         setError('Error al cargar eventos');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEvents();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -76,7 +81,7 @@ const Home: React.FC = () => {
     <div className="bg-white">
       {/* Hero Section */}
       <div className="relative h-screen max-h-[650px] overflow-hidden">
-        <ImageCarousel images={heroImages} interval={5000} />
+        <ImageCarousel images={carouselImages} interval={5000} />
         
         <div className="absolute inset-0 bg-black/30"></div>
         
@@ -103,6 +108,12 @@ const Home: React.FC = () => {
                 Crear evento
               </Link>
             </div>
+          </div>
+        </div>
+        
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <div className="w-6 h-10 border border-white/50 rounded-full flex justify-center">
+            <div className="w-1 h-2 bg-white rounded-full mt-2"></div>
           </div>
         </div>
       </div>

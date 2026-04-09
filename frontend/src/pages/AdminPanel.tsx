@@ -3,6 +3,7 @@ import { adminService } from '../services/api';
 import { User } from '../types';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import CarouselManager from '../components/Admin/CarouselManager';
 
 interface Stats {
   totalUsers: number;
@@ -22,7 +23,7 @@ const AdminPanel: React.FC = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'users' | 'stats'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'stats' | 'carousel'>('users');
   const [searchTerm, setSearchTerm] = useState('');
   const [blockReason, setBlockReason] = useState('');
   const [showBlockModal, setShowBlockModal] = useState(false);
@@ -122,7 +123,7 @@ const AdminPanel: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-light text-gray-800">Panel de Administración</h1>
-          <p className="text-gray-400 text-sm mt-1">Gestión completa de usuarios y eventos</p>
+          <p className="text-gray-400 text-sm mt-1">Gestión completa de usuarios, eventos y estadísticas</p>
           <div className="w-12 h-0.5 bg-gray-200 mt-3"></div>
         </div>
 
@@ -147,6 +148,16 @@ const AdminPanel: React.FC = () => {
             }`}
           >
             Usuarios ({users.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('carousel')}
+            className={`pb-2 px-1 font-medium text-sm transition-colors ${
+              activeTab === 'carousel'
+                ? 'text-gray-900 border-b-2 border-gray-900'
+                : 'text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            Carrusel
           </button>
         </div>
 
@@ -323,7 +334,7 @@ const AdminPanel: React.FC = () => {
                           </div>
                           <span className="font-medium text-gray-800">{user.name}</span>
                         </div>
-                      </td>
+                       </td>
                       <td className="px-4 py-3 text-gray-500">{user.email}</td>
                       <td className="px-4 py-3">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -333,7 +344,7 @@ const AdminPanel: React.FC = () => {
                         }`}>
                           {user.role === 'admin' ? 'Admin' : 'Organizador'}
                         </span>
-                      </td>
+                       </td>
                       <td className="px-4 py-3 text-center text-gray-600">{user.eventsCount || 0}</td>
                       <td className="px-4 py-3">
                         {user.isBlocked ? (
@@ -341,10 +352,10 @@ const AdminPanel: React.FC = () => {
                         ) : (
                           <span className="text-xs text-green-600">Activo</span>
                         )}
-                      </td>
+                       </td>
                       <td className="px-4 py-3 text-gray-400 text-xs">
                         {format(new Date(user.createdAt), "dd/MM/yyyy", { locale: es })}
-                      </td>
+                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1 justify-center">
                           {!user.isBlocked ? (
@@ -396,8 +407,8 @@ const AdminPanel: React.FC = () => {
                             </svg>
                           </button>
                         </div>
-                      </td>
-                    </tr>
+                       </td>
+                     </tr>
                   ))}
                 </tbody>
               </table>
@@ -406,6 +417,15 @@ const AdminPanel: React.FC = () => {
                   <p className="text-gray-400 text-sm">No se encontraron usuarios</p>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Gestión de Carrusel */}
+        {activeTab === 'carousel' && (
+          <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+            <div className="p-6">
+              <CarouselManager />
             </div>
           </div>
         )}
