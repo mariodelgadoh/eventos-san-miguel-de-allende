@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ToastProvider from './contexts/ToastContext';
 import Navbar from './components/Navbar';
+import SessionManager from './components/SessionManager';
 import Home from './pages/Home';
 import EventsList from './pages/EventsList';
 import EventDetail from './pages/EventDetail';
@@ -19,6 +20,7 @@ function App() {
     <Router>
       <ToastProvider>
         <AuthProvider>
+          <SessionManager />
           <div className="min-h-screen bg-gray-50">
             <Navbar />
             <Routes>
