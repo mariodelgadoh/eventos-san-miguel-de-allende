@@ -16,7 +16,17 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  // Usar la misma lógica que api.ts
+  const getApiUrl = () => {
+    if (window.location.hostname !== 'localhost') {
+      return 'https://eventos-san-miguel-de-allende.onrender.com/api';
+    }
+    return process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  };
+
+  const API_URL = getApiUrl();
+
+  console.log('API_URL password:', API_URL);
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +38,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
       setSuccess('Código enviado a tu correo');
       setStep('code');
     } catch (err: any) {
+      console.error('Error:', err.response?.data);
       setError(err.response?.data?.message || 'Error al enviar el código');
     } finally {
       setLoading(false);
