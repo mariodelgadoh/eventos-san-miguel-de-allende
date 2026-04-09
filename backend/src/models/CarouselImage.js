@@ -5,7 +5,7 @@ const carouselImageSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  imageFile: {
+  filename: {
     type: String,
     default: ''
   },
@@ -31,5 +31,4 @@ const carouselImageSchema = new mongoose.Schema({
   }
 });
 
-// Si no existe la colección, la crea
 module.exports = mongoose.model('CarouselImage', carouselImageSchema);

@@ -1,10 +1,19 @@
 const CarouselImage = require('../models/CarouselImage');
+const fs = require('fs');
+const path = require('path');
 
 // Obtener todas las imágenes activas (público)
 exports.getCarouselImages = async (req, res) => {
   try {
     const images = await CarouselImage.find({ isActive: true }).sort({ order: 1 });
-    res.json(images);
+    const imagesWithUrl = images.map(img => {
+      const imgObj = img.toObject();
+      if (imgObj.filename && !imgObj.imageUrl) {
+        imgObj.imageUrl = `${req.protocol}://${req.get('host')}/uploads/${imgObj.filename}`;
+      }
+      return imgObj;
+    });
+    res.json(imagesWithUrl);
   } catch (error) {
     console.error('Error getCarouselImages:', error);
     res.status(500).json({ message: 'Error al obtener imágenes', error: error.message });
@@ -15,34 +24,51 @@ exports.getCarouselImages = async (req, res) => {
 exports.getAllCarouselImages = async (req, res) => {
   try {
     const images = await CarouselImage.find().sort({ order: 1 });
-    res.json(images);
+    const imagesWithUrl = images.map(img => {
+      const imgObj = img.toObject();
+      if (imgObj.filename && !imgObj.imageUrl) {
+        imgObj.imageUrl = `${req.protocol}://${req.get('host')}/uploads/${imgObj.filename}`;
+      }
+      return imgObj;
+    });
+    res.json(imagesWithUrl);
   } catch (error) {
     console.error('Error getAllCarouselImages:', error);
     res.status(500).json({ message: 'Error al obtener imágenes', error: error.message });
   }
 };
 
-// Agregar nueva imagen
+// Agregar nueva imagen (con archivo o URL)
 exports.addCarouselImage = async (req, res) => {
   try {
-    const { imageUrl, title, order } = req.body;
+    const { title, order, imageUrl } = req.body;
+    let filename = '';
     
-    console.log('Recibiendo imagen:', { imageUrl, title, order });
+    if (req.file) {
+      filename = req.file.filename;
+      console.log('Archivo guardado:', filename);
+    }
     
-    if (!imageUrl) {
-      return res.status(400).json({ message: 'La URL de la imagen es obligatoria' });
+    if (!filename && !imageUrl) {
+      return res.status(400).json({ message: 'Debes subir una imagen o proporcionar una URL' });
     }
     
     const newImage = new CarouselImage({
-      imageUrl: imageUrl,
+      imageUrl: imageUrl || '',
+      filename: filename || '',
       title: title || '',
       order: order || 0,
       isActive: true
     });
     
     await newImage.save();
-    console.log('Imagen guardada:', newImage._id);
-    res.status(201).json(newImage);
+    
+    const responseImg = newImage.toObject();
+    if (responseImg.filename) {
+      responseImg.imageUrl = `${req.protocol}://${req.get('host')}/uploads/${responseImg.filename}`;
+    }
+    
+    res.status(201).json(responseImg);
   } catch (error) {
     console.error('Error addCarouselImage:', error);
     res.status(500).json({ message: 'Error al agregar imagen', error: error.message });
@@ -53,7 +79,12 @@ exports.addCarouselImage = async (req, res) => {
 exports.updateCarouselImage = async (req, res) => {
   try {
     const { id } = req.params;
-    const { imageUrl, title, order, isActive } = req.body;
+    const { title, order, isActive, imageUrl } = req.body;
+    let filename = '';
+    
+    if (req.file) {
+      filename = req.file.filename;
+    }
     
     const updateData = {
       title: title || '',
@@ -62,8 +93,20 @@ exports.updateCarouselImage = async (req, res) => {
       updatedAt: Date.now()
     };
     
-    if (imageUrl !== undefined) {
+    if (filename) {
+      // Si hay un nuevo archivo, eliminar el anterior
+      const oldImage = await CarouselImage.findById(id);
+      if (oldImage && oldImage.filename) {
+        const oldFilePath = path.join(__dirname, '../../uploads', oldImage.filename);
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+      }
+      updateData.filename = filename;
+      updateData.imageUrl = '';
+    } else if (imageUrl !== undefined) {
       updateData.imageUrl = imageUrl;
+      updateData.filename = '';
     }
     
     const updatedImage = await CarouselImage.findByIdAndUpdate(id, updateData, { new: true });
@@ -72,7 +115,12 @@ exports.updateCarouselImage = async (req, res) => {
       return res.status(404).json({ message: 'Imagen no encontrada' });
     }
     
-    res.json(updatedImage);
+    const responseImg = updatedImage.toObject();
+    if (responseImg.filename) {
+      responseImg.imageUrl = `${req.protocol}://${req.get('host')}/uploads/${responseImg.filename}`;
+    }
+    
+    res.json(responseImg);
   } catch (error) {
     console.error('Error updateCarouselImage:', error);
     res.status(500).json({ message: 'Error al actualizar imagen', error: error.message });
@@ -83,12 +131,22 @@ exports.updateCarouselImage = async (req, res) => {
 exports.deleteCarouselImage = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedImage = await CarouselImage.findByIdAndDelete(id);
+    const image = await CarouselImage.findById(id);
     
-    if (!deletedImage) {
+    if (!image) {
       return res.status(404).json({ message: 'Imagen no encontrada' });
     }
     
+    // Eliminar archivo físico si existe
+    if (image.filename) {
+      const filePath = path.join(__dirname, '../../uploads', image.filename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        console.log('Archivo eliminado:', filePath);
+      }
+    }
+    
+    await CarouselImage.findByIdAndDelete(id);
     res.json({ message: 'Imagen eliminada exitosamente' });
   } catch (error) {
     console.error('Error deleteCarouselImage:', error);
@@ -99,6 +157,16 @@ exports.deleteCarouselImage = async (req, res) => {
 // Inicializar imágenes por defecto
 exports.initializeDefaultImages = async (req, res) => {
   try {
+    // Eliminar todas las imágenes existentes y sus archivos
+    const existingImages = await CarouselImage.find();
+    for (const img of existingImages) {
+      if (img.filename) {
+        const filePath = path.join(__dirname, '../../uploads', img.filename);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+    }
     await CarouselImage.deleteMany({});
     
     const defaultImages = [
