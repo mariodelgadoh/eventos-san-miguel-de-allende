@@ -92,14 +92,19 @@ const EditEvent: React.FC = () => {
       const data = await eventService.getEventById(id!);
       setEvent(data);
       setImages(data.images || []);
+      
+      // Migración automática: si el evento tiene 'date' pero no 'startDate'
+      const startDateValue = data.startDate || (data as any).date;
+      const endDateValue = data.endDate || (data as any).date;
+      
       setFormData({
         name: data.name,
         description: data.description,
         address: data.address,
         lat: data.coordinates.lat.toString(),
         lng: data.coordinates.lng.toString(),
-        startDate: formatDateForInput(data.startDate),
-        endDate: formatDateForInput(data.endDate),
+        startDate: formatDateForInput(startDateValue),
+        endDate: formatDateForInput(endDateValue),
         category: data.category,
       });
     } catch (error) {
@@ -148,7 +153,6 @@ const EditEvent: React.FC = () => {
       const localStartDate = new Date(formData.startDate);
       const localEndDate = new Date(formData.endDate);
       
-      // Validar que endDate sea mayor que startDate
       if (localEndDate <= localStartDate) {
         alert('❌ La fecha de fin debe ser posterior a la fecha de inicio');
         setSaving(false);
@@ -342,7 +346,7 @@ const EditEvent: React.FC = () => {
                 />
               </div>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Hora de San Miguel de Allende (México)</p>
+            <p className="text-xs text-gray-500 -mt-2">Hora de San Miguel de Allende (México)</p>
 
             <div>
               <label className="block text-gray-700 font-semibold mb-2">
