@@ -8,6 +8,10 @@ exports.requestPasswordReset = async (req, res) => {
   try {
     const { email } = req.body;
     
+    if (!email) {
+      return res.status(400).json({ message: 'El correo es obligatorio' });
+    }
+    
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: 'No existe una cuenta con este correo' });
@@ -37,6 +41,10 @@ exports.verifyCode = async (req, res) => {
   try {
     const { email, code } = req.body;
     
+    if (!email || !code) {
+      return res.status(400).json({ message: 'Email y código son obligatorios' });
+    }
+    
     const resetRequest = await PasswordReset.findOne({ email, code });
     if (!resetRequest) {
       return res.status(400).json({ message: 'Código inválido o expirado' });
@@ -44,6 +52,7 @@ exports.verifyCode = async (req, res) => {
     
     res.json({ message: 'Código verificado correctamente' });
   } catch (error) {
+    console.error('Error en verifyCode:', error);
     res.status(500).json({ message: 'Error al verificar el código', error: error.message });
   }
 };
@@ -52,6 +61,14 @@ exports.verifyCode = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { email, code, newPassword } = req.body;
+    
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+    }
+    
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' });
+    }
     
     const resetRequest = await PasswordReset.findOne({ email, code });
     if (!resetRequest) {
@@ -73,6 +90,7 @@ exports.resetPassword = async (req, res) => {
     
     res.json({ message: 'Contraseña actualizada exitosamente' });
   } catch (error) {
+    console.error('Error en resetPassword:', error);
     res.status(500).json({ message: 'Error al restablecer la contraseña', error: error.message });
   }
 };
