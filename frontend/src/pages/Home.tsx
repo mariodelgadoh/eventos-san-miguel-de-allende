@@ -81,19 +81,19 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section con Carrusel de Imágenes */}
-      <div className="relative h-[500px] sm:h-[600px] md:h-[700px] lg:h-[800px] overflow-hidden">
+      <div className="relative h-screen max-h-[600px] sm:max-h-[700px] md:max-h-[800px] overflow-hidden">
         <ImageCarousel images={heroImages} interval={5000} />
         
         <div className="relative z-10 flex items-center justify-center h-full text-white">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 animate-fade-in">
-               Descubre los mejores eventos
+              🎉 Descubre los mejores eventos
             </h1>
             <p className="text-lg sm:text-xl md:text-2xl mb-2 sm:mb-4">
               en San Miguel de Allende
             </p>
             <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
-              Cultura, música, gastronomía, arte y deporte en la ciudad más hermosa de México
+              Cultura, música, gastronomía, arte, deporte y eventos religiosos en la ciudad más hermosa de México
             </p>
             <Link
               to="/events"
@@ -173,13 +173,14 @@ const Home: React.FC = () => {
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 md:mb-12">
             📂 Explora por categorías
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
             {[
               { name: 'Cultura', icon: '🎭', color: 'purple' },
               { name: 'Música', icon: '🎵', color: 'green' },
               { name: 'Gastronomía', icon: '🍽️', color: 'red' },
               { name: 'Arte', icon: '🎨', color: 'yellow' },
               { name: 'Deporte', icon: '⚽', color: 'blue' },
+              { name: 'Religioso', icon: '⛪', color: 'indigo' },
             ].map((category) => (
               <Link
                 key={category.name}

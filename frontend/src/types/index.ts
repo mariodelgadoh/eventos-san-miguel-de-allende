@@ -7,7 +7,7 @@ export interface User {
   isBlocked?: boolean;
   blockedReason?: string;
   blockedAt?: string;
-  createdAt?: string;
+  createdAt: string;
   lastLogin?: string;
 }
 
@@ -16,7 +16,7 @@ export interface Coordinates {
   lng: number;
 }
 
-export type Category = 'Cultura' | 'Música' | 'Gastronomía' | 'Arte' | 'Deporte';
+export type Category = 'Cultura' | 'Música' | 'Gastronomía' | 'Arte' | 'Deporte' | 'Religioso';
 
 export interface Event {
   _id: string;
@@ -25,7 +25,8 @@ export interface Event {
   address: string;
   coordinates: Coordinates;
   images: string[];
-  date: string;
+  startDate: string;
+  endDate: string;
   category: Category;
   organizer: User;
   isFeatured: boolean;

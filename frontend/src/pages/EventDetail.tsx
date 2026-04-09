@@ -5,7 +5,7 @@ import { es } from 'date-fns/locale';
 import { eventService, commentService, favoriteService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Event, Comment } from '../types';
-import { formatEventDate } from '../utils/dateUtils';
+import { formatEventDateRange } from '../utils/dateUtils';
 
 const EventDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -162,6 +162,7 @@ const EventDetail: React.FC = () => {
     Gastronomía: '🍽️',
     Arte: '🎨',
     Deporte: '⚽',
+    Religioso: '⛪',
   };
 
   const categoryColors: Record<string, string> = {
@@ -170,6 +171,7 @@ const EventDetail: React.FC = () => {
     Gastronomía: 'from-red-500 to-orange-500',
     Arte: 'from-yellow-500 to-amber-500',
     Deporte: 'from-blue-500 to-cyan-500',
+    Religioso: 'from-indigo-500 to-purple-500',
   };
 
   return (
@@ -261,7 +263,7 @@ const EventDetail: React.FC = () => {
                 <div>
                   <p className="text-sm text-gray-500">Fecha y hora</p>
                   <p className="font-semibold text-gray-800">
-                    {formatEventDate(event.date)}
+                    {formatEventDateRange(event.startDate, event.endDate)}
                   </p>
                 </div>
               </div>

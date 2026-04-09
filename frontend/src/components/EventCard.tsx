@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Event } from '../types';
-import { formatEventDateOnly } from '../utils/dateUtils';
+import { formatEventDateOnly, formatEventTime } from '../utils/dateUtils';
 
 interface EventCardProps {
   event: Event;
@@ -26,6 +26,7 @@ const EventCard: React.FC<EventCardProps> = ({
     Gastronomía: 'bg-red-100 text-red-800',
     Arte: 'bg-yellow-100 text-yellow-800',
     Deporte: 'bg-blue-100 text-blue-800',
+    Religioso: 'bg-indigo-100 text-indigo-800',
   };
 
   const categoryIcons: Record<string, string> = {
@@ -34,6 +35,7 @@ const EventCard: React.FC<EventCardProps> = ({
     Gastronomía: '🍽️',
     Arte: '🎨',
     Deporte: '⚽',
+    Religioso: '⛪',
   };
 
   return (
@@ -88,7 +90,7 @@ const EventCard: React.FC<EventCardProps> = ({
           <div className="flex items-center gap-1 sm:gap-2">
             <span>📅</span>
             <span className="text-xs sm:text-sm">
-              {formatEventDateOnly(event.date)}
+              {formatEventDateOnly(event.startDate)} - {formatEventTime(event.endDate)}
             </span>
           </div>
           <div className="flex items-center gap-1 sm:gap-2">

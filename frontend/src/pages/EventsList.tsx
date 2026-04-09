@@ -16,7 +16,8 @@ const EventsList: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
 
-  const categories = ['Cultura', 'Música', 'Gastronomía', 'Arte', 'Deporte'];
+  // ✅ CATEGORÍAS COMPLETAS CON RELIGIOSO
+  const categories = ['Cultura', 'Música', 'Gastronomía', 'Arte', 'Deporte', 'Religioso'];
 
   useEffect(() => {
     const categoryParam = searchParams.get('category');

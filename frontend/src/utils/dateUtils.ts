@@ -65,3 +65,11 @@ export const formatDateForInput = (dateString: string): string => {
     return '';
   }
 };
+
+// Formatear rango de fechas
+export const formatEventDateRange = (startDate: string, endDate: string): string => {
+  const start = formatEventDateOnly(startDate);
+  const startTime = formatEventTime(startDate);
+  const endTime = formatEventTime(endDate);
+  return `${start} de ${startTime} a ${endTime}`;
+};

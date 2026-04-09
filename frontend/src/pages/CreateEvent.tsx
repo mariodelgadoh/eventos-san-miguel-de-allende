@@ -63,7 +63,8 @@ const CreateEvent: React.FC = () => {
     address: '',
     lat: '',
     lng: '',
-    date: formatDateForInput(new Date().toISOString()),
+    startDate: formatDateForInput(new Date().toISOString()),
+    endDate: formatDateForInput(new Date(Date.now() + 3600000).toISOString()),
     category: 'Cultura',
   });
 
@@ -73,6 +74,7 @@ const CreateEvent: React.FC = () => {
     { name: 'Gastronomía', icon: '🍽️', color: 'red' },
     { name: 'Arte', icon: '🎨', color: 'yellow' },
     { name: 'Deporte', icon: '⚽', color: 'blue' },
+    { name: 'Religioso', icon: '⛪', color: 'indigo' },
   ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -98,22 +100,35 @@ const CreateEvent: React.FC = () => {
     setLoading(true);
 
     try {
-      // Convertir la fecha local a UTC para guardar
-      const localDate = new Date(formData.date);
-      const utcDate = localToUTC(localDate);
+      const localStartDate = new Date(formData.startDate);
+      const localEndDate = new Date(formData.endDate);
+      
+      // Validar que endDate sea mayor que startDate
+      if (localEndDate <= localStartDate) {
+        alert('❌ La fecha de fin debe ser posterior a la fecha de inicio');
+        setLoading(false);
+        return;
+      }
+      
+      const utcStartDate = localToUTC(localStartDate);
+      const utcEndDate = localToUTC(localEndDate);
       
       const compressedImages = await Promise.all(
         imageFiles.map(file => compressImage(file, 0.5))
       );
       
       const eventData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
+        address: formData.address,
         coordinates: {
           lat: parseFloat(formData.lat),
           lng: parseFloat(formData.lng),
         },
-        date: utcDate.toISOString(),
+        startDate: utcStartDate.toISOString(),
+        endDate: utcEndDate.toISOString(),
         images: compressedImages,
+        category: formData.category,
       };
 
       await eventService.createEvent(eventData);
@@ -225,20 +240,35 @@ const CreateEvent: React.FC = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">
-                📅 Fecha y hora *
-              </label>
-              <input
-                type="datetime-local"
-                name="date"
-                value={formData.date}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
-              />
-              <p className="text-xs text-gray-500 mt-1">Hora de San Miguel de Allende (México)</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                  🗓️ Fecha y hora de inicio *
+                </label>
+                <input
+                  type="datetime-local"
+                  name="startDate"
+                  value={formData.startDate}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2">
+                  🗓️ Fecha y hora de fin *
+                </label>
+                <input
+                  type="datetime-local"
+                  name="endDate"
+                  value={formData.endDate}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                />
+              </div>
             </div>
+            <p className="text-xs text-gray-500 mt-1">Hora de San Miguel de Allende (México)</p>
 
             <div>
               <label className="block text-gray-700 font-semibold mb-2">
