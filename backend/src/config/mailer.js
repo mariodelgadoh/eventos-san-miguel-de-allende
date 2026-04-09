@@ -1,12 +1,19 @@
 const nodemailer = require('nodemailer');
 
-// Configuración para Gmail
+// Configuración para Gmail con opciones de timeout
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
+  // Opciones para evitar timeout
+  pool: true,
+  maxConnections: 1,
+  rateDelta: 1000,
+  rateLimit: 5,
+  socketTimeout: 30000, // 30 segundos
+  connectionTimeout: 30000 // 30 segundos
 });
 
 // Generar código de 6 dígitos
@@ -43,8 +50,14 @@ const sendVerificationEmail = async (email, code) => {
     `
   };
 
-  await transporter.sendMail(mailOptions);
-  return code;
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Correo enviado:', info.messageId);
+    return code;
+  } catch (error) {
+    console.error('❌ Error al enviar correo:', error);
+    throw new Error('No se pudo enviar el correo');
+  }
 };
 
 module.exports = { transporter, generateCode, sendVerificationEmail };
